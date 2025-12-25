@@ -1,0 +1,177 @@
+{
+  "design_system": {
+    "identity": {
+      "name": "LeadFlow Pro",
+      "archetype": "Swiss & High-Contrast",
+      "tone": "Professional, Efficient, Data-Driven, Clear",
+      "description": "A high-performance lead management dashboard designed for sales teams. Prioritizes data density, clarity, and speed."
+    },
+    "typography": {
+      "font_family": {
+        "headings": "Manrope, sans-serif",
+        "body": "Inter, sans-serif",
+        "mono": "JetBrains Mono, monospace"
+      },
+      "weights": {
+        "headings": "font-semibold (600) or font-bold (700)",
+        "body": "font-normal (400) or font-medium (500)"
+      },
+      "sizes": {
+        "h1": "text-3xl md:text-4xl tracking-tight",
+        "h2": "text-2xl md:text-3xl tracking-tight",
+        "h3": "text-xl font-semibold",
+        "body": "text-sm leading-relaxed",
+        "small": "text-xs text-muted-foreground"
+      },
+      "imports": [
+        "@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@500;600;700&family=JetBrains+Mono:wght@400&display=swap');"
+      ]
+    },
+    "colors": {
+      "palette": {
+        "primary": {
+          "DEFAULT": "#0f172a",
+          "foreground": "#f8fafc",
+          "hover": "#1e293b"
+        },
+        "secondary": {
+          "DEFAULT": "#f1f5f9",
+          "foreground": "#0f172a"
+        },
+        "accent": {
+          "DEFAULT": "#2563eb",
+          "foreground": "#ffffff",
+          "hover": "#1d4ed8"
+        },
+        "background": "#f8fafc",
+        "surface": "#ffffff",
+        "border": "#e2e8f0",
+        "muted": "#64748b",
+        "success": "#10b981",
+        "warning": "#f59e0b",
+        "error": "#ef4444"
+      },
+      "usage": {
+        "dashboard_bg": "bg-slate-50",
+        "card_bg": "bg-white",
+        "text_primary": "text-slate-900",
+        "text_secondary": "text-slate-500",
+        "border_subtle": "border-slate-200"
+      }
+    },
+    "spacing": {
+      "container_padding": "p-6 md:p-8",
+      "section_gap": "gap-6",
+      "component_gap": "gap-4",
+      "radius": "rounded-md"
+    },
+    "shadows": {
+      "card": "shadow-sm hover:shadow-md transition-shadow duration-200",
+      "dropdown": "shadow-lg border border-slate-100",
+      "modal": "shadow-2xl"
+    },
+    "visual_enhancers": {
+      "glassmorphism": "bg-white/80 backdrop-blur-md border-b border-slate-200/50",
+      "gradients": "None for backgrounds. Use solid colors for clarity.",
+      "borders": "1px solid #e2e8f0 (slate-200)"
+    }
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-slate-900 text-white hover:bg-slate-800 h-10 px-4 py-2 rounded-md font-medium transition-colors",
+      "secondary": "bg-white text-slate-900 border border-slate-200 hover:bg-slate-50 h-10 px-4 py-2 rounded-md font-medium transition-colors",
+      "ghost": "hover:bg-slate-100 text-slate-600 hover:text-slate-900 h-10 px-4 rounded-md transition-colors",
+      "destructive": "bg-red-500 text-white hover:bg-red-600 h-10 px-4 rounded-md transition-colors"
+    },
+    "cards": {
+      "base": "bg-white border border-slate-200 rounded-md shadow-sm p-6",
+      "interactive": "bg-white border border-slate-200 rounded-md shadow-sm p-6 hover:border-blue-500/50 transition-colors cursor-pointer"
+    },
+    "inputs": {
+      "base": "flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+    },
+    "tables": {
+      "header": "bg-slate-50 text-slate-500 font-medium text-xs uppercase tracking-wider border-b border-slate-200",
+      "row": "border-b border-slate-100 hover:bg-slate-50/50 transition-colors",
+      "cell": "p-4 text-sm text-slate-700"
+    },
+    "badges": {
+      "success": "bg-emerald-100 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full text-xs font-medium",
+      "warning": "bg-amber-100 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full text-xs font-medium",
+      "error": "bg-red-100 text-red-700 border border-red-200 px-2 py-0.5 rounded-full text-xs font-medium",
+      "neutral": "bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 rounded-full text-xs font-medium"
+    }
+  },
+  "layouts": {
+    "dashboard": {
+      "structure": "Sidebar (Left, Fixed) + Header (Top, Sticky) + Main Content (Scrollable)",
+      "grid": "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6",
+      "bento_grid": "Use for KPIs. Mix col-span-1 and col-span-2 cards."
+    },
+    "auth_page": {
+      "structure": "Split Screen. Left: Form (w-full lg:w-1/2). Right: Image/Brand (hidden lg:block lg:w-1/2)",
+      "alignment": "flex items-center justify-center min-h-screen bg-slate-50"
+    }
+  },
+  "assets": {
+    "images": {
+      "login_bg": {
+        "url": "https://images.unsplash.com/photo-1765046255517-412341954c4c?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NjZ8MHwxfHNlYXJjaHwxfHxhYnN0cmFjdCUyMGdlb21ldHJpYyUyMG5ldHdvcmslMjBjb25uZWN0aW9uJTIwd2hpdGUlMjBiYWNrZ3JvdW5kfGVufDB8fHx8MTc2NjcwNzAyMHww&ixlib=rb-4.1.0&q=85",
+        "alt": "Abstract Network Background",
+        "usage": "Right side of login/register page, cover image"
+      },
+      "team_placeholder": {
+        "url": "https://images.unsplash.com/photo-1650784854945-264d5b0b6b07?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDF8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBkaXZlcnNlJTIwYnVzaW5lc3MlMjB0ZWFtJTIwcG9ydHJhaXRzfGVufDB8fHx8MTc2NjcwNzAyMnww&ixlib=rb-4.1.0&q=85",
+        "alt": "Team Members",
+        "usage": "Placeholder for user avatars or team section"
+      }
+    },
+    "icons": {
+      "library": "lucide-react",
+      "style": "Stroke width 1.5px or 2px. Size 16px (sm) to 24px (lg)."
+    }
+  },
+  "instructions_to_main_agent": {
+    "general": [
+      "Use functional components with hooks.",
+      "Strictly follow the color palette. Do not introduce random colors.",
+      "Ensure all interactive elements have hover states.",
+      "Use 'lucide-react' for icons.",
+      "Implement responsive design (Mobile First).",
+      "Use 'recharts' for data visualization.",
+      "Use 'sonner' for toast notifications."
+    ],
+    "file_structure": [
+      "Components: /app/frontend/src/components/ui/",
+      "Pages: /app/frontend/src/pages/",
+      "Layouts: /app/frontend/src/layouts/",
+      "Hooks: /app/frontend/src/hooks/",
+      "Context: /app/frontend/src/context/"
+    ],
+    "accessibility": [
+      "Ensure contrast ratios meet WCAG AA.",
+      "All inputs must have labels or aria-labels.",
+      "Focus states must be visible (ring-2 ring-slate-950)."
+    ]
+  },
+  "UNIVERSAL_GUIDELINES_FOR_MAIN_AGENT": [
+    "Dark colors look good when used independently without gradients. DO NOT use dark colors as gradients",
+    "Don't make generic centered layouts, simplistic gradients, and uniform styling.",
+    "Create depth through layered design elements with z-index hierarchy",
+    "Use glass-morphism effects with backdrop filters (12-24px blur)",
+    "You MUST NOT apply universal transition. Eg: transition: all. This results in breaking transforms. Always add transitions for specific interactive elements like button, input excluding transforms",
+    "You MUST NOT center align the app container, ie do not add .App { text-align: center; } in the css file. This disrupts the human natural reading flow of text",
+    "Always use modern button styles like pill-shaped, or sharp button with interaction animations & color relevant to the app style",
+    "NEVER: use AI assistant Emoji characters like 🤖🧠💭💡🔮🎯📚🎭🎬🎪🎉🎊🎁🎀🎂🍰🎈🎨🎰💰💵💳🏦💎🪙💸🤑📊📈📉💹🔢🏆🥇 etc for icons.",
+    "Every interaction needs micro-animations - hover states, transitions, parallax effects, and entrance animations. Static = dead.",
+    "Use 2-3x more spacing than feels comfortable. Cramped designs look cheap.",
+    "Subtle grain textures, noise overlays, custom cursors, selection states, and loading animations: separates good from extraordinary.",
+    "Main agent relies on these image URLs. Missing categories (especially sponsor logos) = main agent will use placeholder text which is FORBIDDEN",
+    "Prioritize using pre-existing components from src/components/ui when applicable",
+    "Create new components that match the style and conventions of existing components when needed",
+    "Examine existing components to understand the project's component patterns before creating new ones",
+    "Components MUST use named exports (export const ComponentName = ...)",
+    "Pages MUST use default exports (export default function PageName() {...})",
+    "Use sonner for toasts. Sonner component are located in /app/src/components/ui/sonner.tsx"
+  ]
+}
