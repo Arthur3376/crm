@@ -266,6 +266,21 @@ export default function UsersPage() {
                         </span>
                       </TableCell>
                       <TableCell>
+                        {user.role === 'agente' && user.assigned_careers?.length > 0 ? (
+                          <div className="flex flex-wrap gap-1 max-w-[200px]">
+                            {user.assigned_careers.map(career => (
+                              <span key={career} className="pill-badge bg-blue-100 text-blue-700 border-blue-200 border text-xs">
+                                {career}
+                              </span>
+                            ))}
+                          </div>
+                        ) : user.role === 'agente' ? (
+                          <span className="text-xs text-slate-400">Sin asignar</span>
+                        ) : (
+                          <span className="text-xs text-slate-400">N/A</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
                         <span className={`pill-badge ${user.is_active ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-700 border-slate-200'} border`}>
                           {user.is_active ? 'Activo' : 'Inactivo'}
                         </span>
