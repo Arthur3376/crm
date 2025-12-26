@@ -38,13 +38,41 @@ Sistema web para gestión de leads de redes sociales (Facebook, Instagram, TikTo
 7. ✅ Webhooks para integración N8N
 8. ✅ API endpoint público para recibir leads externos
 9. ✅ Sistema de notificaciones configurable (número WhatsApp + webhook N8N)
+10. ✅ **Integración WhatsApp via Twilio** - Envía notificaciones directas por WhatsApp
+11. ✅ **Integración Google Calendar** - Sincroniza citas con el calendario de Google
+
+## Configuración de Integraciones
+
+### WhatsApp (Twilio)
+Variables de entorno en `/app/backend/.env`:
+```
+TWILIO_ACCOUNT_SID="tu_account_sid"
+TWILIO_AUTH_TOKEN="tu_auth_token"
+TWILIO_WHATSAPP_NUMBER="+14155238886"
+```
+
+**Para Sandbox de Twilio:**
+1. El usuario debe enviar "join <código>" al número de WhatsApp de Twilio
+2. Luego podrá recibir notificaciones
+
+### Google Calendar
+Variables de entorno en `/app/backend/.env`:
+```
+GOOGLE_CLIENT_ID="tu_client_id"
+GOOGLE_CLIENT_SECRET="tu_client_secret"
+```
+
+**Para configurar:**
+1. Ve a https://console.cloud.google.com
+2. Crea un proyecto y habilita "Google Calendar API"
+3. Crea credenciales OAuth 2.0 (Web application)
+4. Añade redirect URI: `{TU_URL}/api/auth/google/calendar/callback`
+5. Copia Client ID y Client Secret al .env
 
 ## Próximas Tareas
-1. Integración real con WhatsApp vía N8N (configurar workflow)
-2. Integración con Google Calendar
-3. Reportes exportables (PDF/Excel)
-4. Sistema de permisos más granular
-5. Personalización de marca (logo, colores)
+1. Reportes exportables (PDF/Excel)
+2. Sistema de permisos más granular
+3. Personalización de marca (logo, colores)
 
 ## Credenciales de Prueba
 - Email: admin@leadflow.com
