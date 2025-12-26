@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
@@ -11,7 +11,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../components/ui/select';
-import { Calendar as CalendarComponent } from '../components/ui/calendar';
 import { toast } from 'sonner';
 import {
   ChevronLeft,
@@ -21,7 +20,10 @@ import {
   Phone,
   CheckCircle,
   XCircle,
-  Calendar as CalendarIcon
+  Calendar as CalendarIcon,
+  ExternalLink,
+  Link2,
+  Unlink
 } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
@@ -29,19 +31,40 @@ const API_URL = process.env.REACT_APP_BACKEND_URL;
 export default function CalendarPage() {
   const { user, hasRole } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [appointments, setAppointments] = useState([]);
   const [agents, setAgents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedAgent, setSelectedAgent] = useState('all');
-  const [viewMode, setViewMode] = useState('month'); // 'month' or 'day'
+  const [viewMode, setViewMode] = useState('month');
+  const [googleCalendarStatus, setGoogleCalendarStatus] = useState({
+    connected: false,
+    email: null,
+    configured: false
+  });
+  const [syncingAppointment, setSyncingAppointment] = useState(null);
 
   useEffect(() => {
+    // Check for Google Calendar connection result
+    const googleConnected = searchParams.get('google_connected');
+    const error = searchParams.get('error');
+    
+    if (googleConnected === 'true') {
+      toast.success('¡Google Calendar conectado exitosamente!');
+      // Clear URL params
+      window.history.replaceState({}, '', '/calendar');
+    } else if (error) {
+      toast.error('Error al conectar Google Calendar');
+      window.history.replaceState({}, '', '/calendar');
+    }
+    
     fetchAppointments();
+    fetchGoogleCalendarStatus();
     if (hasRole(['admin', 'gerente', 'supervisor'])) {
       fetchAgents();
     }
-  }, [selectedAgent]);
+  }, [selectedAgent, searchParams]);
 
   const fetchAppointments = async () => {
     try {
@@ -64,6 +87,58 @@ export default function CalendarPage() {
       setAgents(response.data);
     } catch (error) {
       console.error('Error fetching agents:', error);
+    }
+  };
+
+  const fetchGoogleCalendarStatus = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/api/calendar/google/status`, { withCredentials: true });
+      setGoogleCalendarStatus(response.data);
+    } catch (error) {
+      console.error('Error fetching Google Calendar status:', error);
+    }
+  };
+
+  const handleConnectGoogleCalendar = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/api/auth/google/calendar/login`, { withCredentials: true });
+      window.location.href = response.data.authorization_url;
+    } catch (error) {
+      toast.error('Error al iniciar conexión con Google Calendar');
+    }
+  };
+
+  const handleDisconnectGoogleCalendar = async () => {
+    if (!window.confirm('¿Desconectar Google Calendar?')) return;
+    
+    try {
+      await axios.post(`${API_URL}/api/calendar/google/disconnect`, {}, { withCredentials: true });
+      toast.success('Google Calendar desconectado');
+      setGoogleCalendarStatus({ connected: false, email: null, configured: true });
+    } catch (error) {
+      toast.error('Error al desconectar');
+    }
+  };
+
+  const handleSyncToGoogle = async (appointmentId) => {
+    setSyncingAppointment(appointmentId);
+    try {
+      const response = await axios.post(
+        `${API_URL}/api/calendar/google/sync-appointment/${appointmentId}`,
+        {},
+        { withCredentials: true }
+      );
+      toast.success('Cita sincronizada con Google Calendar');
+      fetchAppointments();
+      
+      // Open Google Calendar link if available
+      if (response.data.event_link) {
+        window.open(response.data.event_link, '_blank');
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Error al sincronizar');
+    } finally {
+      setSyncingAppointment(null);
     }
   };
 
@@ -96,18 +171,15 @@ export default function CalendarPage() {
     
     const days = [];
     
-    // Previous month days
     for (let i = 0; i < startingDay; i++) {
       const prevDate = new Date(year, month, -startingDay + i + 1);
       days.push({ date: prevDate, isCurrentMonth: false });
     }
     
-    // Current month days
     for (let i = 1; i <= daysInMonth; i++) {
       days.push({ date: new Date(year, month, i), isCurrentMonth: true });
     }
     
-    // Next month days
     const remainingDays = 42 - days.length;
     for (let i = 1; i <= remainingDays; i++) {
       days.push({ date: new Date(year, month + 1, i), isCurrentMonth: false });
@@ -172,12 +244,45 @@ export default function CalendarPage() {
             {appointments.length} cita{appointments.length !== 1 ? 's' : ''} programada{appointments.length !== 1 ? 's' : ''}
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
+          {/* Google Calendar Connection */}
+          {googleCalendarStatus.configured && (
+            googleCalendarStatus.connected ? (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-emerald-600 flex items-center gap-1">
+                  <CheckCircle className="w-4 h-4" />
+                  {googleCalendarStatus.email}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleDisconnectGoogleCalendar}
+                  className="text-red-600 border-red-200 hover:bg-red-50"
+                >
+                  <Unlink className="w-4 h-4 mr-1" />
+                  Desconectar
+                </Button>
+              </div>
+            ) : (
+              <Button
+                variant="outline"
+                onClick={handleConnectGoogleCalendar}
+                className="flex items-center gap-2"
+                data-testid="connect-google-btn"
+              >
+                <svg className="w-4 h-4" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                Conectar Google Calendar
+              </Button>
+            )
+          )}
+          
           {hasRole(['admin', 'gerente', 'supervisor']) && (
-            <Select
-              value={selectedAgent}
-              onValueChange={setSelectedAgent}
-            >
+            <Select value={selectedAgent} onValueChange={setSelectedAgent}>
               <SelectTrigger className="w-48" data-testid="agent-filter">
                 <SelectValue placeholder="Todos los agentes" />
               </SelectTrigger>
@@ -225,25 +330,19 @@ export default function CalendarPage() {
                 <ChevronRight className="w-5 h-5" />
               </Button>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setSelectedDate(new Date())}
-            >
+            <Button variant="outline" size="sm" onClick={() => setSelectedDate(new Date())}>
               Hoy
             </Button>
           </CardHeader>
           <CardContent>
             {viewMode === 'month' ? (
               <div className="grid grid-cols-7 gap-px bg-slate-200 rounded-md overflow-hidden">
-                {/* Day headers */}
                 {['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'].map(day => (
                   <div key={day} className="bg-slate-50 p-2 text-center text-sm font-medium text-slate-500">
                     {day}
                   </div>
                 ))}
                 
-                {/* Calendar days */}
                 {days.map(({ date, isCurrentMonth }, index) => {
                   const dayAppointments = getAppointmentsForDate(date);
                   const isSelected = date.toDateString() === selectedDate.toDateString();
@@ -270,6 +369,7 @@ export default function CalendarPage() {
                             className={`calendar-event text-white ${getStatusColor(apt.status)}`}
                             title={apt.title}
                           >
+                            {apt.google_calendar_synced && <Link2 className="w-2 h-2 inline mr-0.5" />}
                             {apt.title}
                           </div>
                         ))}
@@ -297,7 +397,15 @@ export default function CalendarPage() {
                       >
                         <div className="flex items-start justify-between">
                           <div>
-                            <h4 className="font-medium text-slate-900">{apt.title}</h4>
+                            <h4 className="font-medium text-slate-900 flex items-center gap-2">
+                              {apt.title}
+                              {apt.google_calendar_synced && (
+                                <span className="text-xs text-emerald-600 flex items-center gap-1">
+                                  <Link2 className="w-3 h-3" />
+                                  Sincronizado
+                                </span>
+                              )}
+                            </h4>
                             <p className="text-sm text-slate-500 mt-1">{apt.description}</p>
                             <div className="flex items-center gap-4 mt-2 text-sm text-slate-600">
                               <span className="flex items-center gap-1">
@@ -334,6 +442,33 @@ export default function CalendarPage() {
                                 </Button>
                               </>
                             )}
+                            {googleCalendarStatus.connected && !apt.google_calendar_synced && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleSyncToGoogle(apt.appointment_id)}
+                                disabled={syncingAppointment === apt.appointment_id}
+                              >
+                                {syncingAppointment === apt.appointment_id ? (
+                                  <div className="w-4 h-4 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin" />
+                                ) : (
+                                  <>
+                                    <CalendarIcon className="w-4 h-4 mr-1" />
+                                    Sincronizar
+                                  </>
+                                )}
+                              </Button>
+                            )}
+                            {apt.google_calendar_link && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => window.open(apt.google_calendar_link, '_blank')}
+                                className="text-blue-600"
+                              >
+                                <ExternalLink className="w-4 h-4" />
+                              </Button>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -350,7 +485,7 @@ export default function CalendarPage() {
           </CardContent>
         </Card>
 
-        {/* Sidebar - Selected day appointments */}
+        {/* Sidebar */}
         <Card className="lg:col-span-1" data-testid="day-appointments">
           <CardHeader>
             <CardTitle className="text-lg">
@@ -367,7 +502,8 @@ export default function CalendarPage() {
                 >
                   <div className="flex items-center gap-2 mb-1">
                     <span className={`w-2 h-2 rounded-full ${getStatusColor(apt.status)}`} />
-                    <span className="text-sm font-medium text-slate-900">{apt.title}</span>
+                    <span className="text-sm font-medium text-slate-900 flex-1 truncate">{apt.title}</span>
+                    {apt.google_calendar_synced && <Link2 className="w-3 h-3 text-emerald-600" />}
                   </div>
                   <div className="text-xs text-slate-500 space-y-1">
                     <p className="flex items-center gap-1">
