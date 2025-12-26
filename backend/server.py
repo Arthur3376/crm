@@ -886,6 +886,206 @@ async def delete_user(user_id: str, request: Request):
     
     return {"message": "Usuario eliminado"}
 
+# ============== TEACHER ENDPOINTS ==============
+
+@api_router.post("/teachers", response_model=TeacherResponse)
+async def create_teacher(teacher_data: TeacherCreate, request: Request):
+    """Create a new teacher"""
+    await require_roles(["admin", "gerente"])(request)
+    
+    # Check if email already exists
+    existing = await db.teachers.find_one({"email": teacher_data.email}, {"_id": 0})
+    if existing:
+        raise HTTPException(status_code=400, detail="El email ya está registrado")
+    
+    teacher_id = f"teacher_{uuid.uuid4().hex[:12]}"
+    now = datetime.now(timezone.utc)
+    
+    teacher = {
+        "teacher_id": teacher_id,
+        "name": teacher_data.name,
+        "email": teacher_data.email,
+        "phone": teacher_data.phone,
+        "subjects": teacher_data.subjects,
+        "is_active": True,
+        "created_at": now.isoformat(),
+        "updated_at": now.isoformat()
+    }
+    
+    await db.teachers.insert_one(teacher)
+    teacher.pop("_id", None)
+    
+    logger.info(f"Teacher created: {teacher_id}")
+    return TeacherResponse(**teacher, created_at=now)
+
+@api_router.get("/teachers", response_model=List[TeacherResponse])
+async def get_teachers(request: Request):
+    """Get all teachers"""
+    await get_current_user(request)
+    
+    teachers = await db.teachers.find({}, {"_id": 0}).to_list(1000)
+    return [TeacherResponse(**t, created_at=datetime.fromisoformat(t["created_at"])) for t in teachers]
+
+@api_router.get("/teachers/{teacher_id}", response_model=TeacherResponse)
+async def get_teacher(teacher_id: str, request: Request):
+    """Get a single teacher"""
+    await get_current_user(request)
+    
+    teacher = await db.teachers.find_one({"teacher_id": teacher_id}, {"_id": 0})
+    if not teacher:
+        raise HTTPException(status_code=404, detail="Maestro no encontrado")
+    
+    return TeacherResponse(**teacher, created_at=datetime.fromisoformat(teacher["created_at"]))
+
+@api_router.put("/teachers/{teacher_id}", response_model=TeacherResponse)
+async def update_teacher(teacher_id: str, teacher_data: TeacherUpdate, request: Request):
+    """Update a teacher"""
+    await require_roles(["admin", "gerente"])(request)
+    
+    teacher = await db.teachers.find_one({"teacher_id": teacher_id}, {"_id": 0})
+    if not teacher:
+        raise HTTPException(status_code=404, detail="Maestro no encontrado")
+    
+    update_data = {k: v for k, v in teacher_data.model_dump().items() if v is not None}
+    update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
+    
+    await db.teachers.update_one({"teacher_id": teacher_id}, {"$set": update_data})
+    
+    updated_teacher = await db.teachers.find_one({"teacher_id": teacher_id}, {"_id": 0})
+    return TeacherResponse(**updated_teacher, created_at=datetime.fromisoformat(updated_teacher["created_at"]))
+
+@api_router.delete("/teachers/{teacher_id}")
+async def delete_teacher(teacher_id: str, request: Request):
+    """Delete a teacher"""
+    await require_roles(["admin"])(request)
+    
+    result = await db.teachers.delete_one({"teacher_id": teacher_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Maestro no encontrado")
+    
+    return {"message": "Maestro eliminado"}
+
+# ============== CAREER MANAGEMENT ENDPOINTS ==============
+
+@api_router.post("/careers/full", response_model=CareerResponse)
+async def create_career_full(career_data: CareerCreate, request: Request):
+    """Create a career with schedules"""
+    await require_roles(["admin", "gerente"])(request)
+    
+    # Check if career name already exists
+    existing = await db.careers_full.find_one({"name": career_data.name}, {"_id": 0})
+    if existing:
+        raise HTTPException(status_code=400, detail="La carrera ya existe")
+    
+    career_id = f"career_{uuid.uuid4().hex[:12]}"
+    now = datetime.now(timezone.utc)
+    
+    # Process schedules to add teacher names
+    schedules = []
+    for schedule in career_data.schedules:
+        schedule_dict = schedule.model_dump()
+        if schedule.teacher_id:
+            teacher = await db.teachers.find_one({"teacher_id": schedule.teacher_id}, {"_id": 0})
+            if teacher:
+                schedule_dict["teacher_name"] = teacher["name"]
+        schedules.append(schedule_dict)
+    
+    career = {
+        "career_id": career_id,
+        "name": career_data.name,
+        "description": career_data.description,
+        "modality": career_data.modality,
+        "schedules": schedules,
+        "is_active": True,
+        "created_at": now.isoformat(),
+        "updated_at": now.isoformat()
+    }
+    
+    await db.careers_full.insert_one(career)
+    career.pop("_id", None)
+    
+    # Also add to the simple careers list if not exists
+    careers_doc = await db.settings.find_one({"type": "careers"}, {"_id": 0})
+    if careers_doc and career_data.name not in careers_doc.get("items", []):
+        await db.settings.update_one(
+            {"type": "careers"},
+            {"$push": {"items": career_data.name}}
+        )
+    
+    logger.info(f"Career created: {career_id}")
+    return CareerResponse(**career, created_at=now)
+
+@api_router.get("/careers/full", response_model=List[CareerResponse])
+async def get_careers_full(request: Request):
+    """Get all careers with schedules"""
+    await get_current_user(request)
+    
+    careers = await db.careers_full.find({}, {"_id": 0}).to_list(1000)
+    return [CareerResponse(**c, created_at=datetime.fromisoformat(c["created_at"])) for c in careers]
+
+@api_router.get("/careers/full/{career_id}", response_model=CareerResponse)
+async def get_career_full(career_id: str, request: Request):
+    """Get a single career with schedules"""
+    await get_current_user(request)
+    
+    career = await db.careers_full.find_one({"career_id": career_id}, {"_id": 0})
+    if not career:
+        raise HTTPException(status_code=404, detail="Carrera no encontrada")
+    
+    return CareerResponse(**career, created_at=datetime.fromisoformat(career["created_at"]))
+
+@api_router.put("/careers/full/{career_id}", response_model=CareerResponse)
+async def update_career_full(career_id: str, career_data: CareerUpdate, request: Request):
+    """Update a career"""
+    await require_roles(["admin", "gerente"])(request)
+    
+    career = await db.careers_full.find_one({"career_id": career_id}, {"_id": 0})
+    if not career:
+        raise HTTPException(status_code=404, detail="Carrera no encontrada")
+    
+    update_data = {}
+    for k, v in career_data.model_dump().items():
+        if v is not None:
+            if k == "schedules":
+                # Process schedules to add teacher names
+                schedules = []
+                for schedule in v:
+                    schedule_dict = schedule if isinstance(schedule, dict) else schedule.model_dump()
+                    if schedule_dict.get("teacher_id"):
+                        teacher = await db.teachers.find_one({"teacher_id": schedule_dict["teacher_id"]}, {"_id": 0})
+                        if teacher:
+                            schedule_dict["teacher_name"] = teacher["name"]
+                    schedules.append(schedule_dict)
+                update_data["schedules"] = schedules
+            else:
+                update_data[k] = v
+    
+    update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
+    
+    await db.careers_full.update_one({"career_id": career_id}, {"$set": update_data})
+    
+    updated_career = await db.careers_full.find_one({"career_id": career_id}, {"_id": 0})
+    return CareerResponse(**updated_career, created_at=datetime.fromisoformat(updated_career["created_at"]))
+
+@api_router.delete("/careers/full/{career_id}")
+async def delete_career_full(career_id: str, request: Request):
+    """Delete a career"""
+    await require_roles(["admin"])(request)
+    
+    career = await db.careers_full.find_one({"career_id": career_id}, {"_id": 0})
+    if not career:
+        raise HTTPException(status_code=404, detail="Carrera no encontrada")
+    
+    # Remove from simple careers list
+    await db.settings.update_one(
+        {"type": "careers"},
+        {"$pull": {"items": career["name"]}}
+    )
+    
+    result = await db.careers_full.delete_one({"career_id": career_id})
+    
+    return {"message": "Carrera eliminada"}
+
 # ============== LEAD ENDPOINTS ==============
 
 @api_router.post("/leads", response_model=LeadResponse)
