@@ -7,11 +7,11 @@ import {
   UserCircle,
   Calendar,
   Webhook,
+  Bell,
   LogOut,
   Menu,
   X,
-  ChevronDown,
-  Bell
+  ChevronDown
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
 import {
