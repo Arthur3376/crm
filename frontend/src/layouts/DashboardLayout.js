@@ -129,7 +129,7 @@ const DashboardLayout = () => {
             <div className="w-8 h-8 bg-slate-900 rounded-md flex items-center justify-center">
               <span className="text-white font-bold text-sm">LF</span>
             </div>
-            <span className="font-semibold text-slate-900 text-lg tracking-tight">LeadFlow</span>
+            <span className="font-semibold text-slate-900 text-lg tracking-tight">UCIC</span>
           </div>
           <button
             onClick={() => setSidebarOpen(false)}

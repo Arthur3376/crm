@@ -78,7 +78,7 @@ export default function LoginPage() {
             <div className="w-10 h-10 bg-slate-900 rounded-md flex items-center justify-center">
               <span className="text-white font-bold text-lg">LF</span>
             </div>
-            <span className="font-semibold text-slate-900 text-xl tracking-tight">LeadFlow Pro</span>
+            <span className="font-semibold text-slate-900 text-xl tracking-tight">UCIC</span>
           </div>
 
           {/* Title */}
