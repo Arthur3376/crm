@@ -201,6 +201,57 @@ class CareerResponse(BaseModel):
     is_active: bool = True
     created_at: datetime
 
+# Student Models
+class StudentDocument(BaseModel):
+    document_id: str
+    name: str  # INE, Certificado, Foto, etc.
+    filename: str
+    uploaded_at: str
+
+class AttendanceRecord(BaseModel):
+    date: str
+    subject: str
+    teacher_id: Optional[str] = None
+    teacher_name: Optional[str] = None
+    status: str  # "presente", "ausente", "justificado"
+    notes: Optional[str] = None
+
+class StudentCreate(BaseModel):
+    full_name: str
+    email: EmailStr
+    phone: str
+    career_id: str
+    career_name: str
+    institutional_email: Optional[str] = None
+    lead_id: Optional[str] = None  # Referencia al lead original
+
+class StudentUpdate(BaseModel):
+    full_name: Optional[str] = None
+    email: Optional[EmailStr] = None
+    phone: Optional[str] = None
+    institutional_email: Optional[str] = None
+    is_active: Optional[bool] = None
+
+class StudentResponse(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    student_id: str
+    full_name: str
+    email: str
+    phone: str
+    career_id: str
+    career_name: str
+    institutional_email: Optional[str] = None
+    lead_id: Optional[str] = None
+    documents: List[dict] = []
+    attendance: List[dict] = []
+    is_active: bool = True
+    created_at: datetime
+
+class ConvertLeadToStudent(BaseModel):
+    career_id: str
+    career_name: str
+    institutional_email: Optional[str] = None
+
 # Lead Models
 class LeadBase(BaseModel):
     full_name: str
