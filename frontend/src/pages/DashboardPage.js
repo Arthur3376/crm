@@ -68,12 +68,10 @@ export default function DashboardPage() {
 
   const getStatusLabel = (status) => {
     const labels = {
-      nuevo: 'Nuevo',
-      contactado: 'Contactado',
-      en_progreso: 'En Progreso',
-      cita_agendada: 'Cita Agendada',
-      convertido: 'Convertido',
-      no_interesado: 'No Interesado'
+      etapa_1_informacion: 'Etapa 1 - Información',
+      etapa_2_contacto: 'Etapa 2 - Contacto',
+      etapa_3_documentacion: 'Etapa 3 - Documentación',
+      etapa_4_inscrito: 'Etapa 4 - Inscrito'
     };
     return labels[status] || status;
   };
