@@ -421,7 +421,11 @@ export default function LeadsPage() {
                                 Ver detalles
                               </DropdownMenuItem>
                               <DropdownMenuItem
-                                onClick={(e) => { e.stopPropagation(); window.open(`https://wa.me/${lead.phone.replace(/\D/g, '')}`, '_blank'); }}
+                                onClick={(e) => { 
+                                  e.stopPropagation(); 
+                                  const phone = lead.phone.replace(/\D/g, '');
+                                  window.open(`https://web.whatsapp.com/send?phone=${phone}`, '_blank', 'noopener,noreferrer'); 
+                                }}
                               >
                                 <Phone className="w-4 h-4 mr-2" />
                                 WhatsApp
