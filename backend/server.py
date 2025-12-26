@@ -638,10 +638,23 @@ async def create_lead(lead_data: LeadCreate, request: Request):
     
     # Get agent name
     agent_name = None
+    agent_data = None
     if lead_doc["assigned_agent_id"]:
         agent = await db.users.find_one({"user_id": lead_doc["assigned_agent_id"]}, {"_id": 0})
         if agent:
             agent_name = agent["name"]
+            agent_data = {"name": agent["name"], "email": agent.get("email"), "phone": agent.get("phone")}
+    
+    # Send notification for new lead
+    await send_notification("lead.created", {
+        "lead_id": lead_id,
+        "full_name": lead_data.full_name,
+        "email": lead_data.email,
+        "phone": lead_data.phone,
+        "career_interest": lead_data.career_interest,
+        "source": lead_data.source,
+        "source_detail": lead_data.source_detail
+    }, agent_data)
     
     return LeadResponse(
         lead_id=lead_id,
