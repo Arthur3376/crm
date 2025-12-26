@@ -148,6 +148,35 @@ export default function NotificationsPage() {
         </div>
       </div>
 
+      {/* WhatsApp Status Card */}
+      <Card className={whatsappStatus.configured ? "border-emerald-200 bg-emerald-50/50" : "border-amber-200 bg-amber-50/50"}>
+        <CardContent className="pt-6">
+          <div className="flex items-start gap-3">
+            <MessageSquare className={`w-5 h-5 ${whatsappStatus.configured ? 'text-emerald-600' : 'text-amber-600'} mt-0.5`} />
+            <div className="flex-1">
+              <h3 className={`font-medium ${whatsappStatus.configured ? 'text-emerald-900' : 'text-amber-900'}`}>
+                WhatsApp via Twilio
+              </h3>
+              {whatsappStatus.configured ? (
+                <div className="mt-1">
+                  <p className="text-sm text-emerald-700 flex items-center gap-1">
+                    <CheckCircle className="w-4 h-4" />
+                    Conectado - Número: {whatsappStatus.whatsapp_number}
+                  </p>
+                  <p className="text-xs text-emerald-600 mt-1">
+                    Account SID: {whatsappStatus.account_sid}
+                  </p>
+                </div>
+              ) : (
+                <p className="text-sm text-amber-700 mt-1">
+                  Twilio no está configurado. Contacta al administrador para configurar las credenciales.
+                </p>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Info Card */}
       <Card className="border-blue-200 bg-blue-50/50">
         <CardContent className="pt-6">
@@ -156,8 +185,8 @@ export default function NotificationsPage() {
             <div>
               <h3 className="font-medium text-blue-900">Cómo funcionan las notificaciones</h3>
               <p className="text-sm text-blue-700 mt-1">
-                Cuando llegue un nuevo lead, enviaremos una notificación a la URL de webhook que configures.
-                Puedes usar N8N para recibir esta notificación y enviarla a WhatsApp, Telegram, email, etc.
+                Cuando llegue un nuevo lead, enviaremos una notificación directamente a WhatsApp usando Twilio.
+                También puedes configurar un webhook para N8N como respaldo.
               </p>
             </div>
           </div>
