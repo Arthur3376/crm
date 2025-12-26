@@ -2091,7 +2091,68 @@ async def get_recent_leads(request: Request, limit: int = 10):
 
 @api_router.get("/constants/careers")
 async def get_careers():
+    """Get all careers (from database or defaults)"""
+    careers_doc = await db.settings.find_one({"type": "careers"}, {"_id": 0})
+    if careers_doc and careers_doc.get("items"):
+        return {"careers": careers_doc["items"]}
     return {"careers": CAREERS}
+
+@api_router.post("/careers")
+async def add_career(request: Request):
+    """Add a new career"""
+    await require_roles(["admin", "gerente"])(request)
+    body = await request.json()
+    career_name = body.get("name", "").strip()
+    
+    if not career_name:
+        raise HTTPException(status_code=400, detail="Nombre de carrera requerido")
+    
+    # Get current careers
+    careers_doc = await db.settings.find_one({"type": "careers"}, {"_id": 0})
+    current_careers = careers_doc["items"] if careers_doc else list(CAREERS)
+    
+    if career_name in current_careers:
+        raise HTTPException(status_code=400, detail="La carrera ya existe")
+    
+    current_careers.append(career_name)
+    
+    await db.settings.update_one(
+        {"type": "careers"},
+        {"$set": {"items": current_careers, "updated_at": datetime.now(timezone.utc).isoformat()}},
+        upsert=True
+    )
+    
+    logger.info(f"Career added: {career_name}")
+    return {"careers": current_careers, "message": "Carrera agregada"}
+
+@api_router.delete("/careers/{career_name}")
+async def delete_career(career_name: str, request: Request):
+    """Delete a career"""
+    await require_roles(["admin", "gerente"])(request)
+    
+    # Get current careers
+    careers_doc = await db.settings.find_one({"type": "careers"}, {"_id": 0})
+    current_careers = careers_doc["items"] if careers_doc else list(CAREERS)
+    
+    if career_name not in current_careers:
+        raise HTTPException(status_code=404, detail="Carrera no encontrada")
+    
+    current_careers.remove(career_name)
+    
+    await db.settings.update_one(
+        {"type": "careers"},
+        {"$set": {"items": current_careers, "updated_at": datetime.now(timezone.utc).isoformat()}},
+        upsert=True
+    )
+    
+    # Also remove from users' assigned_careers
+    await db.users.update_many(
+        {"assigned_careers": career_name},
+        {"$pull": {"assigned_careers": career_name}}
+    )
+    
+    logger.info(f"Career deleted: {career_name}")
+    return {"careers": current_careers, "message": "Carrera eliminada"}
 
 @api_router.get("/constants/sources")
 async def get_sources():
