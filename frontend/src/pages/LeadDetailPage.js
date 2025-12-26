@@ -93,7 +93,17 @@ export default function LeadDetailPage() {
     if (hasRole(['admin', 'gerente', 'supervisor'])) {
       fetchAgents();
     }
+    fetchCareers();
   }, [leadId]);
+
+  const fetchCareers = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/api/careers/full`, { withCredentials: true });
+      setCareers(response.data);
+    } catch (error) {
+      console.error('Error fetching careers:', error);
+    }
+  };
 
   const fetchLeadData = async () => {
     try {
