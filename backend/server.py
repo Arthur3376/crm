@@ -671,6 +671,19 @@ async def create_lead(lead_data: LeadCreate, request: Request):
     lead_id = f"lead_{uuid.uuid4().hex[:12]}"
     now = datetime.now(timezone.utc).isoformat()
     
+    # Determine agent assignment
+    assigned_agent_id = lead_data.assigned_agent_id
+    
+    # If no agent specified, try to find one based on career
+    if not assigned_agent_id:
+        career_agent = await find_agent_for_career(lead_data.career_interest)
+        if career_agent:
+            assigned_agent_id = career_agent["user_id"]
+        else:
+            # Fallback to current user if they are an agent, otherwise leave unassigned
+            if current_user["role"] == "agente":
+                assigned_agent_id = current_user["user_id"]
+    
     lead_doc = {
         "lead_id": lead_id,
         "full_name": lead_data.full_name,
@@ -680,7 +693,7 @@ async def create_lead(lead_data: LeadCreate, request: Request):
         "source": lead_data.source,
         "source_detail": lead_data.source_detail,
         "status": "nuevo",
-        "assigned_agent_id": lead_data.assigned_agent_id or current_user["user_id"],
+        "assigned_agent_id": assigned_agent_id,
         "notes": None,
         "created_at": now,
         "updated_at": now,
