@@ -73,10 +73,10 @@ app = FastAPI(title="LeadFlow Pro API")
 api_router = APIRouter(prefix="/api")
 
 # ============== ENUMS & CONSTANTS ==============
-USER_ROLES = ["admin", "gerente", "supervisor", "agente"]
+USER_ROLES = ["admin", "gerente", "supervisor", "agente", "maestro"]
 LEAD_SOURCES = ["facebook", "instagram", "tiktok", "manual", "webhook"]
-LEAD_STATUSES = ["nuevo", "contactado", "en_progreso", "cita_agendada", "convertido", "no_interesado"]
-CAREERS = ["Ingeniería", "Medicina", "Derecho", "Administración", "Contabilidad", "Psicología", "Diseño", "Marketing", "Otra"]
+LEAD_STATUSES = ["etapa_1_informacion", "etapa_2_contacto", "etapa_3_documentacion", "etapa_4_inscrito"]
+DEFAULT_CAREERS = ["Ingeniería", "Medicina", "Derecho", "Administración", "Contabilidad", "Psicología", "Diseño", "Marketing", "Otra"]
 NOTIFICATION_EVENTS = ["lead.created", "lead.updated", "appointment.created", "appointment.reminder"]
 
 # ============== PYDANTIC MODELS ==============
