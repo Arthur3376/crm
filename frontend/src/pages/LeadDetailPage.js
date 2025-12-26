@@ -51,12 +51,10 @@ const SOURCE_ICONS = {
 };
 
 const STATUSES = [
-  { value: 'nuevo', label: 'Nuevo' },
-  { value: 'contactado', label: 'Contactado' },
-  { value: 'en_progreso', label: 'En Progreso' },
-  { value: 'cita_agendada', label: 'Cita Agendada' },
-  { value: 'convertido', label: 'Convertido' },
-  { value: 'no_interesado', label: 'No Interesado' }
+  { value: 'etapa_1_informacion', label: 'Etapa 1 - Información', color: 'bg-blue-100 text-blue-700' },
+  { value: 'etapa_2_contacto', label: 'Etapa 2 - Contacto', color: 'bg-yellow-100 text-yellow-700' },
+  { value: 'etapa_3_documentacion', label: 'Etapa 3 - Documentación', color: 'bg-purple-100 text-purple-700' },
+  { value: 'etapa_4_inscrito', label: 'Etapa 4 - Inscrito', color: 'bg-green-100 text-green-700' },
 ];
 
 const CAREERS = [
