@@ -74,7 +74,8 @@ export default function UsersPage() {
     email: '',
     password: '',
     role: 'agente',
-    phone: ''
+    phone: '',
+    assigned_careers: []
   });
 
   useEffect(() => {
@@ -99,7 +100,7 @@ export default function UsersPage() {
       await axios.post(`${API_URL}/api/auth/register`, formData, { withCredentials: true });
       toast.success('Usuario creado exitosamente');
       setShowCreateModal(false);
-      setFormData({ name: '', email: '', password: '', role: 'agente', phone: '' });
+      setFormData({ name: '', email: '', password: '', role: 'agente', phone: '', assigned_careers: [] });
       fetchUsers();
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Error al crear el usuario');
@@ -113,7 +114,8 @@ export default function UsersPage() {
         name: formData.name,
         role: formData.role,
         phone: formData.phone,
-        is_active: formData.is_active
+        is_active: formData.is_active,
+        assigned_careers: formData.assigned_careers
       }, { withCredentials: true });
       toast.success('Usuario actualizado');
       setShowEditModal(false);
