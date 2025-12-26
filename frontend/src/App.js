@@ -131,6 +131,22 @@ const AppRouter = () => {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="teachers"
+          element={
+            <ProtectedRoute allowedRoles={['admin', 'gerente']}>
+              <TeachersPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="careers"
+          element={
+            <ProtectedRoute allowedRoles={['admin', 'gerente']}>
+              <CareersPage />
+            </ProtectedRoute>
+          }
+        />
         <Route path="calendar" element={<CalendarPage />} />
         <Route
           path="webhooks"
