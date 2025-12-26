@@ -41,7 +41,6 @@ import {
   Filter,
   MoreVertical,
   Eye,
-  Pencil,
   Trash2,
   Phone,
   Mail,
@@ -50,7 +49,8 @@ import {
   Music2,
   PenLine,
   Webhook,
-  X
+  X,
+  Users
 } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
