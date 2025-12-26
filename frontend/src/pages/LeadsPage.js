@@ -262,14 +262,14 @@ export default function LeadsPage() {
                 <div>
                   <Label className="text-slate-600 mb-1.5 block text-sm">Estado</Label>
                   <Select
-                    value={filters.status}
-                    onValueChange={(value) => setFilters(prev => ({ ...prev, status: value }))}
+                    value={filters.status || "all"}
+                    onValueChange={(value) => setFilters(prev => ({ ...prev, status: value === "all" ? "" : value }))}
                   >
                     <SelectTrigger data-testid="filter-status">
                       <SelectValue placeholder="Todos" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Todos</SelectItem>
+                      <SelectItem value="all">Todos</SelectItem>
                       {STATUSES.map(s => (
                         <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
                       ))}
@@ -279,14 +279,14 @@ export default function LeadsPage() {
                 <div>
                   <Label className="text-slate-600 mb-1.5 block text-sm">Fuente</Label>
                   <Select
-                    value={filters.source}
-                    onValueChange={(value) => setFilters(prev => ({ ...prev, source: value }))}
+                    value={filters.source || "all"}
+                    onValueChange={(value) => setFilters(prev => ({ ...prev, source: value === "all" ? "" : value }))}
                   >
                     <SelectTrigger data-testid="filter-source">
                       <SelectValue placeholder="Todas" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Todas</SelectItem>
+                      <SelectItem value="all">Todas</SelectItem>
                       {SOURCES.map(s => (
                         <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>
                       ))}
@@ -296,14 +296,14 @@ export default function LeadsPage() {
                 <div>
                   <Label className="text-slate-600 mb-1.5 block text-sm">Carrera</Label>
                   <Select
-                    value={filters.career}
-                    onValueChange={(value) => setFilters(prev => ({ ...prev, career: value }))}
+                    value={filters.career || "all"}
+                    onValueChange={(value) => setFilters(prev => ({ ...prev, career: value === "all" ? "" : value }))}
                   >
                     <SelectTrigger data-testid="filter-career">
                       <SelectValue placeholder="Todas" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Todas</SelectItem>
+                      <SelectItem value="all">Todas</SelectItem>
                       {CAREERS.map(c => (
                         <SelectItem key={c} value={c}>{c}</SelectItem>
                       ))}
@@ -314,14 +314,14 @@ export default function LeadsPage() {
                   <div>
                     <Label className="text-slate-600 mb-1.5 block text-sm">Agente</Label>
                     <Select
-                      value={filters.agent_id}
-                      onValueChange={(value) => setFilters(prev => ({ ...prev, agent_id: value }))}
+                      value={filters.agent_id || "all"}
+                      onValueChange={(value) => setFilters(prev => ({ ...prev, agent_id: value === "all" ? "" : value }))}
                     >
                       <SelectTrigger data-testid="filter-agent">
                         <SelectValue placeholder="Todos" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Todos</SelectItem>
+                        <SelectItem value="all">Todos</SelectItem>
                         {agents.map(a => (
                           <SelectItem key={a.user_id} value={a.user_id}>{a.name}</SelectItem>
                         ))}
