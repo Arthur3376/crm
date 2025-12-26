@@ -191,6 +191,23 @@ export default function LeadDetailPage() {
     }
   };
 
+  const handleConvertToStudent = async (e) => {
+    e.preventDefault();
+    if (!convertData.career_id) {
+      toast.error('Selecciona una carrera');
+      return;
+    }
+
+    try {
+      await axios.post(`${API_URL}/api/leads/${leadId}/convert-to-student`, convertData, { withCredentials: true });
+      toast.success('Lead convertido a estudiante exitosamente');
+      setShowConvertModal(false);
+      navigate('/students');
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Error al convertir');
+    }
+  };
+
   const getStatusLabel = (status) => {
     const item = STATUSES.find(s => s.value === status);
     return item?.label || status;
