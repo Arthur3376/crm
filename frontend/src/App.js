@@ -127,6 +127,14 @@ const AppRouter = () => {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="notifications"
+          element={
+            <ProtectedRoute allowedRoles={['admin', 'gerente']}>
+              <NotificationsPage />
+            </ProtectedRoute>
+          }
+        />
       </Route>
 
       {/* Catch all - redirect to dashboard */}
