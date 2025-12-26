@@ -1137,6 +1137,294 @@ async def delete_career_full(career_id: str, request: Request):
     
     return {"message": "Carrera eliminada"}
 
+# ============== STUDENT ENDPOINTS ==============
+
+STUDENT_DOCUMENTS_PATH = Path("/app/student_documents")
+STUDENT_DOCUMENTS_PATH.mkdir(exist_ok=True)
+
+@api_router.post("/students", response_model=StudentResponse)
+async def create_student(student_data: StudentCreate, request: Request):
+    """Create a new student directly"""
+    await require_roles(["admin", "gerente"])(request)
+    
+    student_id = f"student_{uuid.uuid4().hex[:12]}"
+    now = datetime.now(timezone.utc)
+    
+    # Create student document folder
+    student_folder = STUDENT_DOCUMENTS_PATH / student_id
+    student_folder.mkdir(exist_ok=True)
+    
+    student = {
+        "student_id": student_id,
+        "full_name": student_data.full_name,
+        "email": student_data.email,
+        "phone": student_data.phone,
+        "career_id": student_data.career_id,
+        "career_name": student_data.career_name,
+        "institutional_email": student_data.institutional_email,
+        "lead_id": student_data.lead_id,
+        "documents": [],
+        "attendance": [],
+        "is_active": True,
+        "created_at": now.isoformat(),
+        "updated_at": now.isoformat()
+    }
+    
+    await db.students.insert_one(student)
+    student.pop("_id", None)
+    
+    logger.info(f"Student created: {student_id}")
+    return StudentResponse(**student, created_at=now)
+
+@api_router.post("/leads/{lead_id}/convert-to-student", response_model=StudentResponse)
+async def convert_lead_to_student(lead_id: str, data: ConvertLeadToStudent, request: Request):
+    """Convert a lead (at stage 4) to a student"""
+    await require_roles(["admin", "gerente"])(request)
+    
+    # Get the lead
+    lead = await db.leads.find_one({"lead_id": lead_id}, {"_id": 0})
+    if not lead:
+        raise HTTPException(status_code=404, detail="Lead no encontrado")
+    
+    # Check if lead is at stage 4
+    if lead.get("status") != "etapa_4_inscrito":
+        raise HTTPException(status_code=400, detail="El lead debe estar en Etapa 4 - Inscrito para convertirse en estudiante")
+    
+    # Check if student already exists for this lead
+    existing = await db.students.find_one({"lead_id": lead_id}, {"_id": 0})
+    if existing:
+        raise HTTPException(status_code=400, detail="Este lead ya fue convertido en estudiante")
+    
+    student_id = f"student_{uuid.uuid4().hex[:12]}"
+    now = datetime.now(timezone.utc)
+    
+    # Create student document folder
+    student_folder = STUDENT_DOCUMENTS_PATH / student_id
+    student_folder.mkdir(exist_ok=True)
+    
+    student = {
+        "student_id": student_id,
+        "full_name": lead["full_name"],
+        "email": lead["email"],
+        "phone": lead["phone"],
+        "career_id": data.career_id,
+        "career_name": data.career_name,
+        "institutional_email": data.institutional_email,
+        "lead_id": lead_id,
+        "documents": [],
+        "attendance": [],
+        "is_active": True,
+        "created_at": now.isoformat(),
+        "updated_at": now.isoformat()
+    }
+    
+    await db.students.insert_one(student)
+    student.pop("_id", None)
+    
+    # Update lead status to indicate conversion
+    await db.leads.update_one(
+        {"lead_id": lead_id},
+        {"$set": {"converted_to_student": True, "student_id": student_id}}
+    )
+    
+    logger.info(f"Lead {lead_id} converted to student {student_id}")
+    return StudentResponse(**student, created_at=now)
+
+@api_router.get("/students", response_model=List[StudentResponse])
+async def get_students(request: Request):
+    """Get all students"""
+    await get_current_user(request)
+    
+    students = await db.students.find({}, {"_id": 0}).to_list(1000)
+    return [StudentResponse(**s, created_at=datetime.fromisoformat(s["created_at"])) for s in students]
+
+@api_router.get("/students/{student_id}", response_model=StudentResponse)
+async def get_student(student_id: str, request: Request):
+    """Get a single student"""
+    await get_current_user(request)
+    
+    student = await db.students.find_one({"student_id": student_id}, {"_id": 0})
+    if not student:
+        raise HTTPException(status_code=404, detail="Estudiante no encontrado")
+    
+    return StudentResponse(**student, created_at=datetime.fromisoformat(student["created_at"]))
+
+@api_router.put("/students/{student_id}", response_model=StudentResponse)
+async def update_student(student_id: str, student_data: StudentUpdate, request: Request):
+    """Update a student"""
+    await require_roles(["admin", "gerente"])(request)
+    
+    student = await db.students.find_one({"student_id": student_id}, {"_id": 0})
+    if not student:
+        raise HTTPException(status_code=404, detail="Estudiante no encontrado")
+    
+    update_data = {k: v for k, v in student_data.model_dump().items() if v is not None}
+    update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
+    
+    await db.students.update_one({"student_id": student_id}, {"$set": update_data})
+    
+    updated_student = await db.students.find_one({"student_id": student_id}, {"_id": 0})
+    return StudentResponse(**updated_student, created_at=datetime.fromisoformat(updated_student["created_at"]))
+
+@api_router.delete("/students/{student_id}")
+async def delete_student(student_id: str, request: Request):
+    """Delete a student"""
+    await require_roles(["admin"])(request)
+    
+    result = await db.students.delete_one({"student_id": student_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Estudiante no encontrado")
+    
+    # Optionally delete the documents folder
+    student_folder = STUDENT_DOCUMENTS_PATH / student_id
+    if student_folder.exists():
+        import shutil
+        shutil.rmtree(student_folder)
+    
+    return {"message": "Estudiante eliminado"}
+
+# Document upload endpoints
+from fastapi import UploadFile, File
+
+@api_router.post("/students/{student_id}/documents")
+async def upload_student_document(
+    student_id: str, 
+    document_type: str,
+    file: UploadFile = File(...),
+    request: Request = None
+):
+    """Upload a document for a student"""
+    await require_roles(["admin", "gerente"])(request)
+    
+    student = await db.students.find_one({"student_id": student_id}, {"_id": 0})
+    if not student:
+        raise HTTPException(status_code=404, detail="Estudiante no encontrado")
+    
+    # Validate file type
+    allowed_extensions = [".pdf", ".jpg", ".jpeg", ".png", ".doc", ".docx"]
+    file_ext = Path(file.filename).suffix.lower()
+    if file_ext not in allowed_extensions:
+        raise HTTPException(status_code=400, detail=f"Tipo de archivo no permitido. Extensiones permitidas: {', '.join(allowed_extensions)}")
+    
+    # Create document ID and save file
+    document_id = f"doc_{uuid.uuid4().hex[:8]}"
+    student_folder = STUDENT_DOCUMENTS_PATH / student_id
+    student_folder.mkdir(exist_ok=True)
+    
+    safe_filename = f"{document_id}_{file.filename}"
+    file_path = student_folder / safe_filename
+    
+    with open(file_path, "wb") as f:
+        content = await file.read()
+        f.write(content)
+    
+    # Add document to student record
+    now = datetime.now(timezone.utc)
+    document = {
+        "document_id": document_id,
+        "name": document_type,
+        "filename": safe_filename,
+        "original_filename": file.filename,
+        "uploaded_at": now.isoformat()
+    }
+    
+    await db.students.update_one(
+        {"student_id": student_id},
+        {"$push": {"documents": document}, "$set": {"updated_at": now.isoformat()}}
+    )
+    
+    logger.info(f"Document {document_id} uploaded for student {student_id}")
+    return {"message": "Documento subido exitosamente", "document": document}
+
+@api_router.delete("/students/{student_id}/documents/{document_id}")
+async def delete_student_document(student_id: str, document_id: str, request: Request):
+    """Delete a student document"""
+    await require_roles(["admin", "gerente"])(request)
+    
+    student = await db.students.find_one({"student_id": student_id}, {"_id": 0})
+    if not student:
+        raise HTTPException(status_code=404, detail="Estudiante no encontrado")
+    
+    # Find and remove document
+    document = None
+    for doc in student.get("documents", []):
+        if doc["document_id"] == document_id:
+            document = doc
+            break
+    
+    if not document:
+        raise HTTPException(status_code=404, detail="Documento no encontrado")
+    
+    # Delete file
+    file_path = STUDENT_DOCUMENTS_PATH / student_id / document["filename"]
+    if file_path.exists():
+        file_path.unlink()
+    
+    # Remove from database
+    await db.students.update_one(
+        {"student_id": student_id},
+        {"$pull": {"documents": {"document_id": document_id}}}
+    )
+    
+    return {"message": "Documento eliminado"}
+
+# Attendance endpoints
+@api_router.post("/students/{student_id}/attendance")
+async def record_attendance(student_id: str, request: Request):
+    """Record attendance for a student"""
+    await require_roles(["admin", "gerente", "maestro"])(request)
+    
+    body = await request.json()
+    
+    student = await db.students.find_one({"student_id": student_id}, {"_id": 0})
+    if not student:
+        raise HTTPException(status_code=404, detail="Estudiante no encontrado")
+    
+    now = datetime.now(timezone.utc)
+    attendance_record = {
+        "attendance_id": f"att_{uuid.uuid4().hex[:8]}",
+        "date": body.get("date", now.strftime("%Y-%m-%d")),
+        "subject": body.get("subject", ""),
+        "teacher_id": body.get("teacher_id"),
+        "teacher_name": body.get("teacher_name"),
+        "status": body.get("status", "presente"),  # presente, ausente, justificado
+        "notes": body.get("notes"),
+        "recorded_at": now.isoformat()
+    }
+    
+    await db.students.update_one(
+        {"student_id": student_id},
+        {"$push": {"attendance": attendance_record}, "$set": {"updated_at": now.isoformat()}}
+    )
+    
+    return {"message": "Asistencia registrada", "attendance": attendance_record}
+
+@api_router.get("/students/{student_id}/attendance")
+async def get_student_attendance(student_id: str, request: Request):
+    """Get attendance records for a student"""
+    await get_current_user(request)
+    
+    student = await db.students.find_one({"student_id": student_id}, {"_id": 0})
+    if not student:
+        raise HTTPException(status_code=404, detail="Estudiante no encontrado")
+    
+    return {"attendance": student.get("attendance", [])}
+
+@api_router.get("/students/{student_id}/documents-folder")
+async def get_student_documents_folder(student_id: str, request: Request):
+    """Get the path to student's documents folder"""
+    await require_roles(["admin", "gerente"])(request)
+    
+    student = await db.students.find_one({"student_id": student_id}, {"_id": 0})
+    if not student:
+        raise HTTPException(status_code=404, detail="Estudiante no encontrado")
+    
+    folder_path = STUDENT_DOCUMENTS_PATH / student_id
+    return {
+        "folder_path": str(folder_path),
+        "vpn_note": "Para acceso VPN, configura tu servidor VPN para exponer /app/student_documents/"
+    }
+
 # ============== LEAD ENDPOINTS ==============
 
 @api_router.post("/leads", response_model=LeadResponse)
