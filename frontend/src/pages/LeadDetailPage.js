@@ -38,7 +38,8 @@ import {
   Facebook,
   Instagram,
   Music2,
-  PenLine
+  PenLine,
+  GraduationCap
 } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
