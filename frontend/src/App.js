@@ -11,6 +11,7 @@ import LeadDetailPage from './pages/LeadDetailPage';
 import UsersPage from './pages/UsersPage';
 import CalendarPage from './pages/CalendarPage';
 import WebhooksPage from './pages/WebhooksPage';
+import NotificationsPage from './pages/NotificationsPage';
 
 // Layout
 import DashboardLayout from './layouts/DashboardLayout';
