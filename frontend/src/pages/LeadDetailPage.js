@@ -70,11 +70,18 @@ export default function LeadDetailPage() {
   const [lead, setLead] = useState(null);
   const [conversation, setConversation] = useState(null);
   const [agents, setAgents] = useState([]);
+  const [careers, setCareers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [editData, setEditData] = useState({});
   const [newMessage, setNewMessage] = useState('');
   const [showAppointmentModal, setShowAppointmentModal] = useState(false);
+  const [showConvertModal, setShowConvertModal] = useState(false);
+  const [convertData, setConvertData] = useState({
+    career_id: '',
+    career_name: '',
+    institutional_email: ''
+  });
   const [appointmentData, setAppointmentData] = useState({
     title: '',
     description: '',
