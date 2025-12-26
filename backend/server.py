@@ -125,6 +125,17 @@ class TokenResponse(BaseModel):
     token: str
     user: UserResponse
 
+# Password Reset Models
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str
+
+class AdminResetPasswordRequest(BaseModel):
+    new_password: str
+
 # Lead Models
 class LeadBase(BaseModel):
     full_name: str
