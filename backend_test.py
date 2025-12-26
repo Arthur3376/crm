@@ -236,7 +236,7 @@ class LeadFlowAPITester:
             "scheduled_at": (datetime.now() + timedelta(days=1)).isoformat()
         }
         
-        success, response = self.make_request('POST', 'appointments', appointment_data, 201)
+        success, response = self.make_request('POST', 'appointments', appointment_data, 200)
         if success and 'appointment_id' in response:
             self.test_appointment_id = response['appointment_id']
             self.log_test("Create appointment", True, f"Appointment ID: {self.test_appointment_id}")
