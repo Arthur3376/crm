@@ -1203,6 +1203,14 @@ async def incoming_lead_webhook(payload: N8NLeadPayload):
     lead_id = f"lead_{uuid.uuid4().hex[:12]}"
     now = datetime.now(timezone.utc).isoformat()
     
+    # Find agent based on career
+    assigned_agent_id = None
+    agent_data = None
+    career_agent = await find_agent_for_career(payload.career_interest)
+    if career_agent:
+        assigned_agent_id = career_agent["user_id"]
+        agent_data = {"name": career_agent["name"], "email": career_agent.get("email"), "phone": career_agent.get("phone")}
+    
     lead_doc = {
         "lead_id": lead_id,
         "full_name": payload.full_name,
@@ -1213,7 +1221,7 @@ async def incoming_lead_webhook(payload: N8NLeadPayload):
         "source_detail": payload.source_detail,
         "whatsapp_number": payload.whatsapp_number,
         "status": "nuevo",
-        "assigned_agent_id": None,
+        "assigned_agent_id": assigned_agent_id,
         "notes": None,
         "created_at": now,
         "updated_at": now,
@@ -1234,9 +1242,9 @@ async def incoming_lead_webhook(payload: N8NLeadPayload):
         "career_interest": payload.career_interest,
         "source": payload.source,
         "source_detail": payload.source_detail
-    }, None)
+    }, agent_data)
     
-    return {"success": True, "lead_id": lead_id}
+    return {"success": True, "lead_id": lead_id, "assigned_agent_id": assigned_agent_id}
 
 async def trigger_webhooks(event: str, data: dict):
     """Trigger all active webhooks for a given event"""
