@@ -145,9 +145,19 @@ export default function UsersPage() {
       email: user.email,
       role: user.role,
       phone: user.phone || '',
-      is_active: user.is_active
+      is_active: user.is_active,
+      assigned_careers: user.assigned_careers || []
     });
     setShowEditModal(true);
+  };
+
+  const toggleCareer = (career) => {
+    setFormData(prev => ({
+      ...prev,
+      assigned_careers: prev.assigned_careers.includes(career)
+        ? prev.assigned_careers.filter(c => c !== career)
+        : [...prev.assigned_careers, career]
+    }));
   };
 
   const getRoleLabel = (role) => {
