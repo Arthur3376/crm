@@ -368,6 +368,7 @@ async def register(user_data: UserCreate):
         "phone": user_data.phone,
         "is_active": True,
         "picture": None,
+        "assigned_careers": user_data.assigned_careers,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     
@@ -382,6 +383,7 @@ async def register(user_data: UserCreate):
         phone=user_data.phone,
         is_active=True,
         picture=None,
+        assigned_careers=user_data.assigned_careers,
         created_at=datetime.fromisoformat(user_doc["created_at"])
     )
     
