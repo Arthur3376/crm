@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
+import { Checkbox } from '../components/ui/checkbox';
 import {
   Select,
   SelectContent,
@@ -42,7 +43,8 @@ import {
   UserCircle,
   Mail,
   Phone,
-  Shield
+  Shield,
+  GraduationCap
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
 
@@ -53,6 +55,11 @@ const ROLES = [
   { value: 'gerente', label: 'Gerente' },
   { value: 'supervisor', label: 'Supervisor' },
   { value: 'agente', label: 'Agente de Ventas' }
+];
+
+const CAREERS = [
+  'Ingeniería', 'Medicina', 'Derecho', 'Administración',
+  'Contabilidad', 'Psicología', 'Diseño', 'Marketing', 'Otra'
 ];
 
 export default function UsersPage() {
