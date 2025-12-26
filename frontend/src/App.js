@@ -9,9 +9,11 @@ import DashboardPage from './pages/DashboardPage';
 import LeadsPage from './pages/LeadsPage';
 import LeadDetailPage from './pages/LeadDetailPage';
 import UsersPage from './pages/UsersPage';
+import AgentsPage from './pages/AgentsPage';
 import CalendarPage from './pages/CalendarPage';
 import WebhooksPage from './pages/WebhooksPage';
 import NotificationsPage from './pages/NotificationsPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
 
 // Layout
 import DashboardLayout from './layouts/DashboardLayout';
@@ -96,6 +98,7 @@ const AppRouter = () => {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       
       {/* Protected Routes with Dashboard Layout */}
       <Route
@@ -113,8 +116,16 @@ const AppRouter = () => {
         <Route
           path="users"
           element={
-            <ProtectedRoute allowedRoles={['admin', 'gerente']}>
+            <ProtectedRoute allowedRoles={['admin']}>
               <UsersPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="agents"
+          element={
+            <ProtectedRoute allowedRoles={['admin', 'gerente']}>
+              <AgentsPage />
             </ProtectedRoute>
           }
         />
