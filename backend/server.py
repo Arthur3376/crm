@@ -561,6 +561,7 @@ async def get_users(request: Request):
             phone=user.get("phone"),
             is_active=user.get("is_active", True),
             picture=user.get("picture"),
+            assigned_careers=user.get("assigned_careers", []),
             created_at=created_at
         ))
     return result
@@ -587,6 +588,7 @@ async def get_agents(request: Request):
             phone=user.get("phone"),
             is_active=user.get("is_active", True),
             picture=user.get("picture"),
+            assigned_careers=user.get("assigned_careers", []),
             created_at=created_at
         ))
     return result
