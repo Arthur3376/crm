@@ -1,34 +1,201 @@
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
+/* LeadFlow Pro - Main App Styles */
+
+/* Remove default App centering */
+.App {
+  min-height: 100vh;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
+/* Login page background */
+.login-bg {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
 }
 
-.App-header {
-    background-color: #0f0f10;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
+/* KPI Card styles */
+.kpi-card {
+  @apply bg-white border border-slate-200 rounded-md p-6 transition-shadow duration-200;
 }
 
-.App-link {
-    color: #61dafb;
+.kpi-card:hover {
+  @apply shadow-md;
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+.kpi-icon {
+  @apply w-10 h-10 rounded-md flex items-center justify-center;
+}
+
+.kpi-icon-blue {
+  @apply bg-blue-100 text-blue-600;
+}
+
+.kpi-icon-green {
+  @apply bg-emerald-100 text-emerald-600;
+}
+
+.kpi-icon-amber {
+  @apply bg-amber-100 text-amber-600;
+}
+
+.kpi-icon-purple {
+  @apply bg-purple-100 text-purple-600;
+}
+
+/* Chart container */
+.chart-container {
+  @apply bg-white border border-slate-200 rounded-md p-6;
+}
+
+/* Lead card on mobile */
+.lead-card-mobile {
+  @apply bg-white border border-slate-200 rounded-md p-4 mb-3;
+}
+
+/* Conversation bubble */
+.chat-bubble {
+  @apply max-w-[80%] rounded-lg px-4 py-2;
+}
+
+.chat-bubble-agent {
+  @apply bg-slate-900 text-white ml-auto;
+}
+
+.chat-bubble-lead {
+  @apply bg-slate-100 text-slate-900;
+}
+
+/* Calendar day cell */
+.calendar-day {
+  @apply relative h-24 border border-slate-100 p-1;
+}
+
+.calendar-day-today {
+  @apply bg-blue-50;
+}
+
+.calendar-event {
+  @apply text-xs px-1 py-0.5 rounded truncate mb-0.5 cursor-pointer;
+}
+
+/* Empty state */
+.empty-state {
+  @apply flex flex-col items-center justify-center py-12 text-slate-500;
+}
+
+.empty-state-icon {
+  @apply w-16 h-16 mb-4 text-slate-300;
+}
+
+/* Action buttons group */
+.action-buttons {
+  @apply flex items-center gap-2;
+}
+
+/* Modal overlay */
+.modal-overlay {
+  @apply fixed inset-0 bg-black/50 z-50 flex items-center justify-center;
+}
+
+.modal-content {
+  @apply bg-white rounded-lg shadow-2xl w-full max-w-md mx-4 overflow-hidden;
+}
+
+/* Form styles */
+.form-group {
+  @apply mb-4;
+}
+
+.form-label {
+  @apply block text-sm font-medium text-slate-700 mb-1.5;
+}
+
+.form-input {
+  @apply w-full h-10 px-3 border border-slate-200 rounded-md text-sm;
+  @apply focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-300;
+}
+
+.form-select {
+  @apply w-full h-10 px-3 border border-slate-200 rounded-md text-sm bg-white;
+  @apply focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-300;
+}
+
+.form-textarea {
+  @apply w-full px-3 py-2 border border-slate-200 rounded-md text-sm resize-none;
+  @apply focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-300;
+}
+
+/* Webhook secret display */
+.secret-display {
+  @apply font-mono text-sm bg-slate-100 px-3 py-2 rounded-md break-all;
+}
+
+/* Responsive table */
+@media (max-width: 768px) {
+  .responsive-table {
+    @apply block;
+  }
+  
+  .responsive-table thead {
+    @apply hidden;
+  }
+  
+  .responsive-table tbody tr {
+    @apply block mb-4 border border-slate-200 rounded-md p-4;
+  }
+  
+  .responsive-table td {
+    @apply block text-right py-1;
+  }
+  
+  .responsive-table td::before {
+    content: attr(data-label);
+    @apply float-left font-medium text-slate-500;
+  }
+}
+
+/* Pill badge */
+.pill-badge {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+}
+
+/* Quick action button */
+.quick-action {
+  @apply p-2 rounded-md hover:bg-slate-100 transition-colors duration-150;
+}
+
+/* Notification dot */
+.notification-dot {
+  @apply absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white;
+}
+
+/* Search input */
+.search-input {
+  @apply pl-10 pr-4 h-10 bg-slate-50 border border-slate-200 rounded-md text-sm;
+  @apply focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-300 focus:bg-white;
+}
+
+/* Filter dropdown */
+.filter-dropdown {
+  @apply absolute top-full left-0 mt-1 bg-white border border-slate-200 rounded-md shadow-lg z-10 min-w-[200px];
+}
+
+/* Transition utilities */
+.transition-fast {
+  transition: all 0.15s ease;
+}
+
+.transition-medium {
+  transition: all 0.2s ease;
+}
+
+/* Shadow utilities */
+.shadow-card {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.shadow-dropdown {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Placeholder image styles */
+.business-logo-placeholder {
+  @apply w-full h-48 bg-slate-100 flex items-center justify-center text-slate-400;
 }
