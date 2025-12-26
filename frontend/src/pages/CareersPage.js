@@ -531,14 +531,14 @@ export default function CareersPage() {
             <div className="form-group">
               <Label>Maestro</Label>
               <Select
-                value={scheduleForm.teacher_id}
-                onValueChange={(value) => setScheduleForm(prev => ({ ...prev, teacher_id: value }))}
+                value={scheduleForm.teacher_id || "none"}
+                onValueChange={(value) => setScheduleForm(prev => ({ ...prev, teacher_id: value === "none" ? "" : value }))}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar maestro (opcional)" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Sin asignar</SelectItem>
+                  <SelectItem value="none">Sin asignar</SelectItem>
                   {teachers.map(t => (
                     <SelectItem key={t.teacher_id} value={t.teacher_id}>{t.name}</SelectItem>
                   ))}
