@@ -30,9 +30,15 @@ export default function NotificationsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
+  const [whatsappStatus, setWhatsappStatus] = useState({
+    configured: false,
+    account_sid: null,
+    whatsapp_number: null
+  });
 
   useEffect(() => {
     fetchSettings();
+    fetchWhatsAppStatus();
   }, []);
 
   const fetchSettings = async () => {
@@ -50,6 +56,15 @@ export default function NotificationsPage() {
       toast.error('Error al cargar configuración');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchWhatsAppStatus = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/api/whatsapp/status`, { withCredentials: true });
+      setWhatsappStatus(response.data);
+    } catch (error) {
+      console.error('Error fetching WhatsApp status:', error);
     }
   };
 
