@@ -568,6 +568,77 @@ export default function LeadDetailPage() {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Convert to Student Modal */}
+      <Dialog open={showConvertModal} onOpenChange={setShowConvertModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <GraduationCap className="w-5 h-5" />
+              Convertir a Estudiante
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleConvertToStudent} className="space-y-4">
+            <div className="p-3 bg-green-50 rounded-md">
+              <p className="text-sm text-green-800">
+                <strong>{lead?.full_name}</strong> será registrado como estudiante con acceso a:
+              </p>
+              <ul className="text-xs text-green-700 mt-2 list-disc list-inside">
+                <li>Carpeta de documentos personal</li>
+                <li>Horario de clases asignado</li>
+                <li>Registro de asistencia</li>
+                <li>Email institucional</li>
+              </ul>
+            </div>
+            <div className="form-group">
+              <Label>Carrera *</Label>
+              <Select
+                value={convertData.career_id}
+                onValueChange={(value) => {
+                  const career = careers.find(c => c.career_id === value);
+                  setConvertData(prev => ({
+                    ...prev,
+                    career_id: value,
+                    career_name: career?.name || ''
+                  }));
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar carrera" />
+                </SelectTrigger>
+                <SelectContent>
+                  {careers.map(career => (
+                    <SelectItem key={career.career_id} value={career.career_id}>
+                      {career.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="form-group">
+              <Label>Email Institucional</Label>
+              <Input
+                type="email"
+                value={convertData.institutional_email}
+                onChange={(e) => setConvertData(prev => ({ ...prev, institutional_email: e.target.value }))}
+                placeholder="estudiante@tudominio.edu"
+              />
+              <p className="text-xs text-slate-500 mt-1">
+                Asigna el correo de tu dominio (Google Workspace)
+              </p>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setShowConvertModal(false)}>
+                Cancelar
+              </Button>
+              <Button type="submit" className="bg-green-600 hover:bg-green-700">
+                <GraduationCap className="w-4 h-4 mr-1" />
+                Convertir
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
