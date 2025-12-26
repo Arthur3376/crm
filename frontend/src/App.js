@@ -3,19 +3,6 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { Toaster } from './components/ui/sonner';
 
-// Suppress ResizeObserver error overlay
-useEffect(() => {
-  const hideOverlay = () => {
-    const overlay = document.getElementById('webpack-dev-server-client-overlay');
-    if (overlay) overlay.style.display = 'none';
-  };
-  
-  const observer = new MutationObserver(hideOverlay);
-  observer.observe(document.body, { childList: true, subtree: true });
-  
-  return () => observer.disconnect();
-}, []);
-
 // Pages
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
