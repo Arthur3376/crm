@@ -1,7 +1,3 @@
-#====================================================================================================
-# START - Testing Protocol - DO NOT EDIT OR REMOVE THIS SECTION
-#====================================================================================================
-
 # THIS SECTION CONTAINS CRITICAL TESTING INSTRUCTIONS FOR BOTH AGENTS
 # BOTH MAIN_AGENT AND TESTING_AGENT MUST PRESERVE THIS ENTIRE BLOCK
 
@@ -57,47 +53,131 @@
 ##   test_priority: "high_first"  # or "sequential" or "stuck_first"
 ##
 ## agent_communication:
-##     -agent: "main"  # or "testing" or "user"
-##     -message: "Communication message between agents"
-
-# Protocol Guidelines for Main agent
-#
-# 1. Update Test Result File Before Testing:
-#    - Main agent must always update the `test_result.md` file before calling the testing agent
-#    - Add implementation details to the status_history
-#    - Set `needs_retesting` to true for tasks that need testing
-#    - Update the `test_plan` section to guide testing priorities
-#    - Add a message to `agent_communication` explaining what you've done
-#
-# 2. Incorporate User Feedback:
-#    - When a user provides feedback that something is or isn't working, add this information to the relevant task's status_history
-#    - Update the working status based on user feedback
-#    - If a user reports an issue with a task that was marked as working, increment the stuck_count
-#    - Whenever user reports issue in the app, if we have testing agent and task_result.md file so find the appropriate task for that and append in status_history of that task to contain the user concern and problem as well 
-#
-# 3. Track Stuck Tasks:
-#    - Monitor which tasks have high stuck_count values or where you are fixing same issue again and again, analyze that when you read task_result.md
-#    - For persistent issues, use websearch tool to find solutions
-#    - Pay special attention to tasks in the stuck_tasks list
-#    - When you fix an issue with a stuck task, don't reset the stuck_count until the testing agent confirms it's working
-#
-# 4. Provide Context to Testing Agent:
-#    - When calling the testing agent, provide clear instructions about:
-#      - Which tasks need testing (reference the test_plan)
-#      - Any authentication details or configuration needed
-#      - Specific test scenarios to focus on
-#      - Any known issues or edge cases to verify
-#
-# 5. Call the testing agent with specific instructions referring to test_result.md
-#
-# IMPORTANT: Main agent must ALWAYS update test_result.md BEFORE calling the testing agent, as it relies on this file to understand what to test next.
-
-#====================================================================================================
-# END - Testing Protocol - DO NOT EDIT OR REMOVE THIS SECTION
-#====================================================================================================
-
-
+##   - agent: "main_agent"
+##     message: "Context or instructions for testing agent"
 
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: |
+  Aplicación web para gestionar leads de redes sociales (Facebook, Instagram, TikTok) y de entrada manual.
+  Incluye: seguimiento de leads, gestión de usuarios con 4 roles, base de datos de leads, historial de conversación,
+  integración N8N/WhatsApp, asignación automática de leads por carrera, dashboard, Google Calendar.
+
+backend:
+  - task: "API de usuarios con assigned_careers"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Backend ya tiene soporte para assigned_careers en UserCreate, UserUpdate y UserResponse"
+
+  - task: "Asignación automática de leads por carrera"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Función find_agent_for_career implementada, se usa al crear leads"
+
+frontend:
+  - task: "Selector de carreras en modal Crear Usuario"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/UsersPage.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Añadido selector múltiple de carreras cuando el rol es 'agente'"
+
+  - task: "Selector de carreras en modal Editar Usuario"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/UsersPage.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Añadido selector múltiple de carreras cuando el rol es 'agente'"
+
+  - task: "Mostrar carreras asignadas en tabla de usuarios"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/UsersPage.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Ya implementado anteriormente, columna 'Carreras Asignadas'"
+
+  - task: "Botón copiar teléfono en LeadsPage"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/LeadsPage.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Cambiado de WhatsApp a Copiar Teléfono al portapapeles"
+
+  - task: "Botón copiar teléfono en LeadDetailPage"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/LeadDetailPage.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Cambiado de WhatsApp a Copiar Teléfono al portapapeles"
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: true
+
+test_plan:
+  current_focus:
+    - "Selector de carreras en modal Crear Usuario"
+    - "Selector de carreras en modal Editar Usuario"
+    - "Asignación automática de leads por carrera"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main_agent"
+    message: |
+      Se han implementado las siguientes funcionalidades:
+      1. Selector múltiple de carreras en los modales de Crear y Editar Usuario (solo visible para rol 'agente')
+      2. Botón de copiar teléfono en lugar de WhatsApp (para evitar bloqueos)
+      
+      Para probar:
+      1. Registrar un usuario admin primero para acceder a UsersPage
+      2. Crear un agente con carreras asignadas (ej: Ingeniería, Medicina)
+      3. Verificar que las carreras se muestran en la tabla
+      4. Editar el agente y verificar que las carreras se pueden modificar
+      5. Crear un lead con carrera de interés que coincida con un agente
+      6. Verificar que el lead se asigna automáticamente al agente correcto
+      7. Probar el botón de copiar teléfono en la lista de leads
