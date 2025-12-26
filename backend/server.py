@@ -45,6 +45,7 @@ USER_ROLES = ["admin", "gerente", "supervisor", "agente"]
 LEAD_SOURCES = ["facebook", "instagram", "tiktok", "manual", "webhook"]
 LEAD_STATUSES = ["nuevo", "contactado", "en_progreso", "cita_agendada", "convertido", "no_interesado"]
 CAREERS = ["Ingeniería", "Medicina", "Derecho", "Administración", "Contabilidad", "Psicología", "Diseño", "Marketing", "Otra"]
+NOTIFICATION_EVENTS = ["lead.created", "lead.updated", "appointment.created", "appointment.reminder"]
 
 # ============== PYDANTIC MODELS ==============
 
