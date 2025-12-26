@@ -259,6 +259,28 @@ export default function LeadDetailPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {lead.status === 'etapa_4_inscrito' && !lead.converted_to_student && hasRole(['admin', 'gerente']) && (
+            <Button
+              onClick={() => {
+                const matchingCareer = careers.find(c => c.name === lead.career_interest);
+                setConvertData({
+                  career_id: matchingCareer?.career_id || '',
+                  career_name: matchingCareer?.name || lead.career_interest,
+                  institutional_email: ''
+                });
+                setShowConvertModal(true);
+              }}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              <GraduationCap className="w-4 h-4 mr-2" />
+              Convertir a Estudiante
+            </Button>
+          )}
+          {lead.converted_to_student && (
+            <span className="pill-badge bg-green-100 text-green-700 border-green-200 border">
+              ✓ Convertido a Estudiante
+            </span>
+          )}
           <Button
             variant="outline"
             onClick={() => setShowAppointmentModal(true)}
