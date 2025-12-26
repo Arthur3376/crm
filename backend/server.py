@@ -165,7 +165,7 @@ class TeacherResponse(BaseModel):
     phone: Optional[str] = None
     subjects: List[str] = []
     is_active: bool = True
-    created_at: datetime
+    created_at: str
 
 # Career Schedule Models
 class CareerScheduleItem(BaseModel):
