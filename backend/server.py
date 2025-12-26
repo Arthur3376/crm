@@ -1271,19 +1271,55 @@ async def send_notification(event_type: str, lead_data: dict, agent_data: dict =
         "timestamp": datetime.now(timezone.utc).isoformat()
     }
     
-    # Send to configured webhook (N8N)
+    # Send via Twilio WhatsApp if configured
+    if notification_phone and twilio_client:
+        try:
+            await send_whatsapp_message(notification_phone, message)
+            logger.info(f"WhatsApp notification sent for {event_type}")
+        except Exception as e:
+            logger.error(f"Failed to send WhatsApp notification: {e}")
+    
+    # Send to configured webhook (N8N) as backup
     if webhook_url:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient() as http_client:
             try:
-                await client.post(
+                await http_client.post(
                     webhook_url,
                     json=notification_payload,
                     headers={"Content-Type": "application/json"},
                     timeout=10
                 )
-                logger.info(f"Notification sent for {event_type}")
+                logger.info(f"Webhook notification sent for {event_type}")
             except Exception as e:
-                logger.error(f"Failed to send notification: {e}")
+                logger.error(f"Failed to send webhook notification: {e}")
+
+async def send_whatsapp_message(to_number: str, message: str) -> dict:
+    """Send WhatsApp message using Twilio"""
+    if not twilio_client:
+        logger.warning("Twilio client not initialized")
+        return {"success": False, "error": "Twilio not configured"}
+    
+    try:
+        # Format phone number
+        if not to_number.startswith('+'):
+            to_number = '+' + to_number
+        
+        # Send via Twilio
+        twilio_message = twilio_client.messages.create(
+            from_=f"whatsapp:{TWILIO_WHATSAPP_NUMBER}",
+            body=message,
+            to=f"whatsapp:{to_number}"
+        )
+        
+        logger.info(f"WhatsApp message sent. SID: {twilio_message.sid}")
+        return {
+            "success": True,
+            "message_sid": twilio_message.sid,
+            "status": twilio_message.status
+        }
+    except Exception as e:
+        logger.error(f"Error sending WhatsApp message: {e}")
+        return {"success": False, "error": str(e)}
 
 # ============== NOTIFICATION SETTINGS ENDPOINTS ==============
 
