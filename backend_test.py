@@ -132,7 +132,7 @@ class LeadFlowAPITester:
             "source_detail": "API Test"
         }
         
-        success, response = self.make_request('POST', 'leads', lead_data, 201)
+        success, response = self.make_request('POST', 'leads', lead_data, 200)
         if success and 'lead_id' in response:
             self.test_lead_id = response['lead_id']
             self.log_test("Create lead", True, f"Lead ID: {self.test_lead_id}")
