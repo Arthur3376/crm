@@ -967,7 +967,7 @@ async def create_teacher(teacher_data: TeacherCreate, request: Request):
     teacher.pop("_id", None)
     
     logger.info(f"Teacher created: {teacher_id}")
-    return TeacherResponse(**teacher, created_at=now)
+    return TeacherResponse(**teacher)
 
 @api_router.get("/teachers", response_model=List[TeacherResponse])
 async def get_teachers(request: Request):
@@ -975,7 +975,7 @@ async def get_teachers(request: Request):
     await get_current_user(request)
     
     teachers = await db.teachers.find({}, {"_id": 0}).to_list(1000)
-    return [TeacherResponse(**t, created_at=datetime.fromisoformat(t["created_at"])) for t in teachers]
+    return [TeacherResponse(**t) for t in teachers]
 
 @api_router.get("/teachers/{teacher_id}", response_model=TeacherResponse)
 async def get_teacher(teacher_id: str, request: Request):
@@ -986,7 +986,7 @@ async def get_teacher(teacher_id: str, request: Request):
     if not teacher:
         raise HTTPException(status_code=404, detail="Maestro no encontrado")
     
-    return TeacherResponse(**teacher, created_at=datetime.fromisoformat(teacher["created_at"]))
+    return TeacherResponse(**teacher)
 
 @api_router.put("/teachers/{teacher_id}", response_model=TeacherResponse)
 async def update_teacher(teacher_id: str, teacher_data: TeacherUpdate, request: Request):
@@ -1003,7 +1003,7 @@ async def update_teacher(teacher_id: str, teacher_data: TeacherUpdate, request: 
     await db.teachers.update_one({"teacher_id": teacher_id}, {"$set": update_data})
     
     updated_teacher = await db.teachers.find_one({"teacher_id": teacher_id}, {"_id": 0})
-    return TeacherResponse(**updated_teacher, created_at=datetime.fromisoformat(updated_teacher["created_at"]))
+    return TeacherResponse(**updated_teacher)
 
 @api_router.delete("/teachers/{teacher_id}")
 async def delete_teacher(teacher_id: str, request: Request):
