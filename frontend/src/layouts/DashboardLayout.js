@@ -11,7 +11,8 @@ import {
   LogOut,
   Menu,
   X,
-  ChevronDown
+  ChevronDown,
+  GraduationCap
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
 import {
@@ -53,10 +54,16 @@ const DashboardLayout = () => {
       roles: ['admin', 'gerente', 'supervisor', 'agente']
     },
     {
+      path: '/agents',
+      label: 'Agentes',
+      icon: GraduationCap,
+      roles: ['admin', 'gerente']
+    },
+    {
       path: '/users',
       label: 'Usuarios',
       icon: UserCircle,
-      roles: ['admin', 'gerente']
+      roles: ['admin']
     },
     {
       path: '/webhooks',
