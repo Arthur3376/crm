@@ -8,7 +8,7 @@ import json
 
 def debug_lead_creation():
     """Debug lead creation issue"""
-    base_url = "https://salesconnect-3.preview.emergentagent.com"
+    base_url = "https://leadsync-16.preview.emergentagent.com"
     
     # Login first
     login_response = requests.post(f"{base_url}/api/auth/login", json={

@@ -1495,11 +1495,11 @@ async def get_whatsapp_status(request: Request):
 
 def get_frontend_url():
     """Get frontend URL for redirects"""
-    return os.environ.get('FRONTEND_URL', 'https://salesconnect-3.preview.emergentagent.com')
+    return os.environ.get('FRONTEND_URL', 'https://leadsync-16.preview.emergentagent.com')
 
 def get_google_redirect_uri():
     """Get Google OAuth redirect URI"""
-    backend_url = os.environ.get('REACT_APP_BACKEND_URL', 'https://salesconnect-3.preview.emergentagent.com')
+    backend_url = os.environ.get('REACT_APP_BACKEND_URL', 'https://leadsync-16.preview.emergentagent.com')
     return f"{backend_url}/api/auth/google/calendar/callback"
 
 @api_router.get("/auth/google/calendar/login")
