@@ -4,23 +4,31 @@ import "@/index.css";
 import App from "@/App";
 
 // Suppress ResizeObserver loop error (benign browser warning)
-const resizeObserverErr = window.onerror;
-window.onerror = (message, ...args) => {
-  if (message && message.includes('ResizeObserver loop')) {
-    return true;
-  }
-  if (resizeObserverErr) {
-    return resizeObserverErr(message, ...args);
-  }
-  return false;
-};
-
-// Also suppress in error event listener
-window.addEventListener('error', (e) => {
-  if (e.message && e.message.includes('ResizeObserver loop')) {
-    e.stopImmediatePropagation();
-  }
-});
+// This error is caused by browser's ResizeObserver and doesn't affect functionality
+if (typeof window !== 'undefined') {
+  const errorHandler = (e) => {
+    if (e.message && e.message.includes('ResizeObserver loop')) {
+      const resizeObserverErrDiv = document.getElementById('webpack-dev-server-client-overlay-div');
+      const resizeObserverErr = document.getElementById('webpack-dev-server-client-overlay');
+      if (resizeObserverErrDiv) {
+        resizeObserverErrDiv.style.display = 'none';
+      }
+      if (resizeObserverErr) {
+        resizeObserverErr.style.display = 'none';
+      }
+      e.stopImmediatePropagation();
+      e.preventDefault();
+      return true;
+    }
+  };
+  
+  window.addEventListener('error', errorHandler, true);
+  window.addEventListener('unhandledrejection', (e) => {
+    if (e.reason && e.reason.message && e.reason.message.includes('ResizeObserver')) {
+      e.preventDefault();
+    }
+  });
+}
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
