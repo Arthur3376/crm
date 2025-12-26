@@ -62,6 +62,18 @@ const DashboardLayout = () => {
       roles: ['admin', 'gerente']
     },
     {
+      path: '/teachers',
+      label: 'Maestros',
+      icon: BookOpen,
+      roles: ['admin', 'gerente']
+    },
+    {
+      path: '/careers',
+      label: 'Carreras',
+      icon: School,
+      roles: ['admin', 'gerente']
+    },
+    {
       path: '/users',
       label: 'Usuarios',
       icon: UserCircle,
