@@ -33,7 +33,7 @@ export default function CalendarPage() {
   const [agents, setAgents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [selectedAgent, setSelectedAgent] = useState('');
+  const [selectedAgent, setSelectedAgent] = useState('all');
   const [viewMode, setViewMode] = useState('month'); // 'month' or 'day'
 
   useEffect(() => {
