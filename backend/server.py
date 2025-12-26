@@ -1174,7 +1174,7 @@ async def create_student(student_data: StudentCreate, request: Request):
     student.pop("_id", None)
     
     logger.info(f"Student created: {student_id}")
-    return StudentResponse(**student, created_at=now)
+    return StudentResponse(**student)
 
 @api_router.post("/leads/{lead_id}/convert-to-student", response_model=StudentResponse)
 async def convert_lead_to_student(lead_id: str, data: ConvertLeadToStudent, request: Request):
@@ -1228,7 +1228,7 @@ async def convert_lead_to_student(lead_id: str, data: ConvertLeadToStudent, requ
     )
     
     logger.info(f"Lead {lead_id} converted to student {student_id}")
-    return StudentResponse(**student, created_at=now)
+    return StudentResponse(**student)
 
 @api_router.get("/students", response_model=List[StudentResponse])
 async def get_students(request: Request):
@@ -1236,7 +1236,7 @@ async def get_students(request: Request):
     await get_current_user(request)
     
     students = await db.students.find({}, {"_id": 0}).to_list(1000)
-    return [StudentResponse(**s, created_at=datetime.fromisoformat(s["created_at"])) for s in students]
+    return [StudentResponse(**s) for s in students]
 
 @api_router.get("/students/{student_id}", response_model=StudentResponse)
 async def get_student(student_id: str, request: Request):
@@ -1247,7 +1247,7 @@ async def get_student(student_id: str, request: Request):
     if not student:
         raise HTTPException(status_code=404, detail="Estudiante no encontrado")
     
-    return StudentResponse(**student, created_at=datetime.fromisoformat(student["created_at"]))
+    return StudentResponse(**student)
 
 @api_router.put("/students/{student_id}", response_model=StudentResponse)
 async def update_student(student_id: str, student_data: StudentUpdate, request: Request):
@@ -1264,7 +1264,7 @@ async def update_student(student_id: str, student_data: StudentUpdate, request: 
     await db.students.update_one({"student_id": student_id}, {"$set": update_data})
     
     updated_student = await db.students.find_one({"student_id": student_id}, {"_id": 0})
-    return StudentResponse(**updated_student, created_at=datetime.fromisoformat(updated_student["created_at"]))
+    return StudentResponse(**updated_student)
 
 @api_router.delete("/students/{student_id}")
 async def delete_student(student_id: str, request: Request):
