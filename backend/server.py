@@ -1159,6 +1159,17 @@ async def incoming_lead_webhook(payload: N8NLeadPayload):
     # Trigger outgoing webhooks
     await trigger_webhooks("lead.created", lead_doc)
     
+    # Send notification for new lead from webhook
+    await send_notification("lead.created", {
+        "lead_id": lead_id,
+        "full_name": payload.full_name,
+        "email": payload.email,
+        "phone": payload.phone,
+        "career_interest": payload.career_interest,
+        "source": payload.source,
+        "source_detail": payload.source_detail
+    }, None)
+    
     return {"success": True, "lead_id": lead_id}
 
 async def trigger_webhooks(event: str, data: dict):
