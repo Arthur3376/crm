@@ -81,15 +81,15 @@ export default function NotificationsPage() {
   };
 
   const handleTestNotification = async () => {
-    if (!settings.notification_webhook_url) {
-      toast.error('Configura una URL de webhook primero');
+    if (!settings.notification_phone) {
+      toast.error('Configura un número de WhatsApp primero');
       return;
     }
     
     setTesting(true);
     try {
       await axios.post(`${API_URL}/api/settings/notifications/test`, {}, { withCredentials: true });
-      toast.success('Notificación de prueba enviada');
+      toast.success('Notificación de prueba enviada a WhatsApp');
     } catch (error) {
       toast.error('Error al enviar notificación de prueba');
     } finally {
