@@ -1174,6 +1174,160 @@ async def trigger_webhooks(event: str, data: dict):
             except Exception as e:
                 logger.error(f"Failed to trigger webhook {wh['webhook_id']}: {e}")
 
+async def send_notification(event_type: str, lead_data: dict, agent_data: dict = None):
+    """Send notification to configured phone number via webhook"""
+    settings = await db.notification_settings.find_one({}, {"_id": 0})
+    
+    if not settings:
+        return
+    
+    # Check if notifications are enabled for this event
+    if event_type == "lead.created" and not settings.get("notify_on_new_lead", True):
+        return
+    if event_type == "appointment.created" and not settings.get("notify_on_appointment", True):
+        return
+    
+    notification_phone = settings.get("notification_phone")
+    webhook_url = settings.get("notification_webhook_url")
+    
+    if not notification_phone and not webhook_url:
+        return
+    
+    # Build notification message
+    if event_type == "lead.created":
+        message = f"🔔 *Nuevo Lead*\n\n"
+        message += f"👤 *Nombre:* {lead_data.get('full_name')}\n"
+        message += f"📧 *Email:* {lead_data.get('email')}\n"
+        message += f"📱 *Teléfono:* {lead_data.get('phone')}\n"
+        message += f"🎓 *Carrera:* {lead_data.get('career_interest')}\n"
+        message += f"📍 *Fuente:* {lead_data.get('source')}\n"
+        if agent_data:
+            message += f"👨‍💼 *Agente asignado:* {agent_data.get('name')}\n"
+        message += f"\n⏰ {datetime.now(timezone.utc).strftime('%d/%m/%Y %H:%M')} UTC"
+    elif event_type == "appointment.created":
+        message = f"📅 *Nueva Cita Agendada*\n\n"
+        message += f"👤 *Lead:* {lead_data.get('full_name')}\n"
+        message += f"📱 *Teléfono:* {lead_data.get('phone')}\n"
+        message += f"📋 *Título:* {lead_data.get('title')}\n"
+        message += f"🕐 *Fecha:* {lead_data.get('scheduled_at')}\n"
+        if agent_data:
+            message += f"👨‍💼 *Agente:* {agent_data.get('name')}\n"
+    else:
+        message = f"🔔 Notificación: {event_type}"
+    
+    notification_payload = {
+        "event": event_type,
+        "phone": notification_phone,
+        "message": message,
+        "lead": lead_data,
+        "agent": agent_data,
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    }
+    
+    # Send to configured webhook (N8N)
+    if webhook_url:
+        async with httpx.AsyncClient() as client:
+            try:
+                await client.post(
+                    webhook_url,
+                    json=notification_payload,
+                    headers={"Content-Type": "application/json"},
+                    timeout=10
+                )
+                logger.info(f"Notification sent for {event_type}")
+            except Exception as e:
+                logger.error(f"Failed to send notification: {e}")
+
+# ============== NOTIFICATION SETTINGS ENDPOINTS ==============
+
+@api_router.get("/settings/notifications", response_model=NotificationSettingsResponse)
+async def get_notification_settings(request: Request):
+    await require_roles(["admin", "gerente"])(request)
+    
+    settings = await db.notification_settings.find_one({}, {"_id": 0})
+    
+    if not settings:
+        # Create default settings
+        settings_id = f"settings_{uuid.uuid4().hex[:12]}"
+        now = datetime.now(timezone.utc).isoformat()
+        settings = {
+            "settings_id": settings_id,
+            "notification_phone": None,
+            "notification_webhook_url": None,
+            "notify_on_new_lead": True,
+            "notify_on_appointment": True,
+            "notify_supervisors": False,
+            "updated_at": now
+        }
+        await db.notification_settings.insert_one(settings)
+    
+    updated_at = settings.get("updated_at")
+    if isinstance(updated_at, str):
+        updated_at = datetime.fromisoformat(updated_at)
+    
+    return NotificationSettingsResponse(
+        settings_id=settings["settings_id"],
+        notification_phone=settings.get("notification_phone"),
+        notification_webhook_url=settings.get("notification_webhook_url"),
+        notify_on_new_lead=settings.get("notify_on_new_lead", True),
+        notify_on_appointment=settings.get("notify_on_appointment", True),
+        notify_supervisors=settings.get("notify_supervisors", False),
+        updated_at=updated_at
+    )
+
+@api_router.put("/settings/notifications", response_model=NotificationSettingsResponse)
+async def update_notification_settings(update_data: NotificationSettingsUpdate, request: Request):
+    await require_roles(["admin", "gerente"])(request)
+    
+    now = datetime.now(timezone.utc).isoformat()
+    update_dict = update_data.model_dump()
+    update_dict["updated_at"] = now
+    
+    # Check if settings exist
+    existing = await db.notification_settings.find_one({}, {"_id": 0})
+    
+    if existing:
+        await db.notification_settings.update_one(
+            {"settings_id": existing["settings_id"]},
+            {"$set": update_dict}
+        )
+        settings_id = existing["settings_id"]
+    else:
+        settings_id = f"settings_{uuid.uuid4().hex[:12]}"
+        update_dict["settings_id"] = settings_id
+        await db.notification_settings.insert_one(update_dict)
+    
+    return NotificationSettingsResponse(
+        settings_id=settings_id,
+        notification_phone=update_dict.get("notification_phone"),
+        notification_webhook_url=update_dict.get("notification_webhook_url"),
+        notify_on_new_lead=update_dict.get("notify_on_new_lead", True),
+        notify_on_appointment=update_dict.get("notify_on_appointment", True),
+        notify_supervisors=update_dict.get("notify_supervisors", False),
+        updated_at=datetime.fromisoformat(now)
+    )
+
+@api_router.post("/settings/notifications/test")
+async def test_notification(request: Request):
+    """Send a test notification to verify configuration"""
+    await require_roles(["admin", "gerente"])(request)
+    
+    test_lead = {
+        "full_name": "Lead de Prueba",
+        "email": "test@ejemplo.com",
+        "phone": "+521234567890",
+        "career_interest": "Ingeniería",
+        "source": "manual"
+    }
+    
+    test_agent = {
+        "name": "Admin Demo"
+    }
+    
+    await send_notification("lead.created", test_lead, test_agent)
+    
+    return {"message": "Notificación de prueba enviada"}
+
 # ============== DASHBOARD ENDPOINTS ==============
 
 @api_router.get("/dashboard/stats", response_model=DashboardStats)
