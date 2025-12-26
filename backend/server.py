@@ -199,6 +199,24 @@ class N8NLeadPayload(BaseModel):
     source_detail: Optional[str] = None
     whatsapp_number: Optional[str] = None
 
+# Notification Settings Models
+class NotificationSettingsUpdate(BaseModel):
+    notification_phone: Optional[str] = None
+    notification_webhook_url: Optional[str] = None
+    notify_on_new_lead: bool = True
+    notify_on_appointment: bool = True
+    notify_supervisors: bool = False
+
+class NotificationSettingsResponse(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    settings_id: str
+    notification_phone: Optional[str] = None
+    notification_webhook_url: Optional[str] = None
+    notify_on_new_lead: bool = True
+    notify_on_appointment: bool = True
+    notify_supervisors: bool = False
+    updated_at: datetime
+
 # Dashboard Models
 class DashboardStats(BaseModel):
     total_leads: int
