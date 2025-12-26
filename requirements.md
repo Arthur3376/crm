@@ -37,14 +37,14 @@ Sistema web para gestión de leads de redes sociales (Facebook, Instagram, TikTo
 6. ✅ Gestión de usuarios con 4 roles
 7. ✅ Webhooks para integración N8N
 8. ✅ API endpoint público para recibir leads externos
+9. ✅ Sistema de notificaciones configurable (número WhatsApp + webhook N8N)
 
 ## Próximas Tareas
-1. Integración real con WhatsApp vía N8N
+1. Integración real con WhatsApp vía N8N (configurar workflow)
 2. Integración con Google Calendar
-3. Notificaciones en tiempo real
-4. Reportes exportables (PDF/Excel)
-5. Sistema de permisos más granular
-6. Personalización de marca (logo, colores)
+3. Reportes exportables (PDF/Excel)
+4. Sistema de permisos más granular
+5. Personalización de marca (logo, colores)
 
 ## Credenciales de Prueba
 - Email: admin@leadflow.com
