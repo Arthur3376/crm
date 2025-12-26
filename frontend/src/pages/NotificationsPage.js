@@ -221,7 +221,9 @@ export default function NotificationsPage() {
               data-testid="input-notification-phone"
             />
             <p className="text-xs text-slate-500">
-              Este número se incluirá en el payload del webhook para que N8N pueda enviar el mensaje
+              Incluye el código de país. Este número recibirá las notificaciones de WhatsApp directamente via Twilio.
+              <br />
+              <strong>Nota:</strong> Para usar el Sandbox de Twilio, primero envía "join &lt;código&gt;" al número {whatsappStatus.whatsapp_number || '+14155238886'} desde tu WhatsApp.
             </p>
           </div>
 
