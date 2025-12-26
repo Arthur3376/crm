@@ -613,6 +613,7 @@ async def get_user(user_id: str, request: Request):
         phone=user.get("phone"),
         is_active=user.get("is_active", True),
         picture=user.get("picture"),
+        assigned_careers=user.get("assigned_careers", []),
         created_at=created_at
     )
 
@@ -651,6 +652,7 @@ async def update_user(user_id: str, update_data: UserUpdate, request: Request):
         phone=user.get("phone"),
         is_active=user.get("is_active", True),
         picture=user.get("picture"),
+        assigned_careers=user.get("assigned_careers", []),
         created_at=created_at
     )
 
