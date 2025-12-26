@@ -67,7 +67,7 @@ if RESEND_API_KEY:
     logger.info("Resend email client configured")
 
 # Create the main app
-app = FastAPI(title="LeadFlow Pro API")
+app = FastAPI(title="UCIC API")
 
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
@@ -471,7 +471,7 @@ async def forgot_password(request_data: ForgotPasswordRequest):
         html_content = f"""
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <div style="background: #1e293b; padding: 20px; text-align: center;">
-                <h1 style="color: white; margin: 0;">LeadFlow Pro</h1>
+                <h1 style="color: white; margin: 0;">UCIC</h1>
             </div>
             <div style="padding: 30px; background: #f8fafc;">
                 <h2 style="color: #1e293b;">Recupera tu contraseña</h2>
@@ -487,7 +487,7 @@ async def forgot_password(request_data: ForgotPasswordRequest):
                 <p style="color: #64748b; font-size: 14px;">Si no solicitaste este cambio, puedes ignorar este email.</p>
             </div>
             <div style="padding: 20px; text-align: center; color: #94a3b8; font-size: 12px;">
-                © 2024 LeadFlow Pro. Todos los derechos reservados.
+                © 2024 UCIC. Todos los derechos reservados.
             </div>
         </div>
         """
@@ -496,7 +496,7 @@ async def forgot_password(request_data: ForgotPasswordRequest):
             params = {
                 "from": SENDER_EMAIL,
                 "to": [request_data.email],
-                "subject": "Recupera tu contraseña - LeadFlow Pro",
+                "subject": "Recupera tu contraseña - UCIC",
                 "html": html_content
             }
             await asyncio.to_thread(resend.Emails.send, params)
