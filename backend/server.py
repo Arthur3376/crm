@@ -415,6 +415,7 @@ async def login(credentials: UserLogin):
         phone=user.get("phone"),
         is_active=user.get("is_active", True),
         picture=user.get("picture"),
+        assigned_careers=user.get("assigned_careers", []),
         created_at=created_at
     )
     
