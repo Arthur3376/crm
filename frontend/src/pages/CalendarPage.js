@@ -182,7 +182,7 @@ export default function CalendarPage() {
                 <SelectValue placeholder="Todos los agentes" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos los agentes</SelectItem>
+                <SelectItem value="all">Todos los agentes</SelectItem>
                 {agents.map(a => (
                   <SelectItem key={a.user_id} value={a.user_id}>{a.name}</SelectItem>
                 ))}
