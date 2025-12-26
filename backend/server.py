@@ -136,6 +136,71 @@ class ResetPasswordRequest(BaseModel):
 class AdminResetPasswordRequest(BaseModel):
     new_password: str
 
+# Teacher Models
+class ScheduleItem(BaseModel):
+    day: str  # lunes, martes, etc.
+    start_time: str  # "09:00"
+    end_time: str  # "11:00"
+    mode: str  # "presencial" or "online"
+    classroom: Optional[str] = None  # aula o link de zoom
+
+class TeacherCreate(BaseModel):
+    name: str
+    email: EmailStr
+    phone: Optional[str] = None
+    subjects: List[str] = []  # materias que imparte
+
+class TeacherUpdate(BaseModel):
+    name: Optional[str] = None
+    email: Optional[EmailStr] = None
+    phone: Optional[str] = None
+    subjects: Optional[List[str]] = None
+    is_active: Optional[bool] = None
+
+class TeacherResponse(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    teacher_id: str
+    name: str
+    email: str
+    phone: Optional[str] = None
+    subjects: List[str] = []
+    is_active: bool = True
+    created_at: datetime
+
+# Career Schedule Models
+class CareerScheduleItem(BaseModel):
+    subject: str  # nombre de la materia
+    teacher_id: Optional[str] = None
+    teacher_name: Optional[str] = None
+    day: str
+    start_time: str
+    end_time: str
+    mode: str  # "presencial" or "online"
+    classroom: Optional[str] = None
+
+class CareerCreate(BaseModel):
+    name: str
+    description: Optional[str] = None
+    modality: str = "presencial"  # presencial, online, hibrido
+    schedules: List[CareerScheduleItem] = []
+
+class CareerUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    modality: Optional[str] = None
+    schedules: Optional[List[CareerScheduleItem]] = None
+    is_active: Optional[bool] = None
+
+class CareerResponse(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    career_id: str
+    name: str
+    description: Optional[str] = None
+    modality: str = "presencial"
+    schedules: List[dict] = []
+    is_active: bool = True
+    created_at: datetime
+
 # Lead Models
 class LeadBase(BaseModel):
     full_name: str
