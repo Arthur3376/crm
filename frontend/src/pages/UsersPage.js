@@ -222,6 +222,7 @@ export default function UsersPage() {
                     <TableHead className="font-medium">Usuario</TableHead>
                     <TableHead className="font-medium">Contacto</TableHead>
                     <TableHead className="font-medium">Rol</TableHead>
+                    <TableHead className="font-medium">Carreras Asignadas</TableHead>
                     <TableHead className="font-medium">Estado</TableHead>
                     <TableHead className="font-medium">Registrado</TableHead>
                     <TableHead className="text-right font-medium">Acciones</TableHead>
