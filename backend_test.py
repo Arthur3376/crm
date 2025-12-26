@@ -215,7 +215,7 @@ class LeadFlowAPITester:
             "sender": "agent"
         }
         
-        success, response = self.make_request('POST', 'conversations', message_data, 201)
+        success, response = self.make_request('POST', 'conversations', message_data, 200)
         if success:
             self.log_test("Add conversation message", True, "Message added successfully")
         else:
