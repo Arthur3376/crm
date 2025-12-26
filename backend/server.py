@@ -2091,11 +2091,18 @@ async def get_recent_leads(request: Request, limit: int = 10):
 
 @api_router.get("/constants/careers")
 async def get_careers():
-    """Get all careers (from database or defaults)"""
+    """Get all careers (from database, initializing with defaults if needed)"""
     careers_doc = await db.settings.find_one({"type": "careers"}, {"_id": 0})
-    if careers_doc and careers_doc.get("items"):
+    if careers_doc and "items" in careers_doc:
         return {"careers": careers_doc["items"]}
-    return {"careers": DEFAULT_CAREERS}
+    
+    # Initialize with default careers if not exists
+    await db.settings.update_one(
+        {"type": "careers"},
+        {"$set": {"items": list(DEFAULT_CAREERS), "updated_at": datetime.now(timezone.utc).isoformat()}},
+        upsert=True
+    )
+    return {"careers": list(DEFAULT_CAREERS)}
 
 @api_router.post("/careers")
 async def add_career(request: Request):
@@ -2107,9 +2114,17 @@ async def add_career(request: Request):
     if not career_name:
         raise HTTPException(status_code=400, detail="Nombre de carrera requerido")
     
-    # Get current careers
+    # Get current careers (ensure initialized)
     careers_doc = await db.settings.find_one({"type": "careers"}, {"_id": 0})
-    current_careers = careers_doc["items"] if careers_doc else list(DEFAULT_CAREERS)
+    if not careers_doc or "items" not in careers_doc:
+        current_careers = list(DEFAULT_CAREERS)
+        await db.settings.update_one(
+            {"type": "careers"},
+            {"$set": {"items": current_careers, "updated_at": datetime.now(timezone.utc).isoformat()}},
+            upsert=True
+        )
+    else:
+        current_careers = careers_doc["items"]
     
     if career_name in current_careers:
         raise HTTPException(status_code=400, detail="La carrera ya existe")
@@ -2130,9 +2145,17 @@ async def delete_career(career_name: str, request: Request):
     """Delete a career"""
     await require_roles(["admin", "gerente"])(request)
     
-    # Get current careers
+    # Get current careers (ensure initialized)
     careers_doc = await db.settings.find_one({"type": "careers"}, {"_id": 0})
-    current_careers = careers_doc["items"] if careers_doc else list(DEFAULT_CAREERS)
+    if not careers_doc or "items" not in careers_doc:
+        current_careers = list(DEFAULT_CAREERS)
+        await db.settings.update_one(
+            {"type": "careers"},
+            {"$set": {"items": current_careers, "updated_at": datetime.now(timezone.utc).isoformat()}},
+            upsert=True
+        )
+    else:
+        current_careers = careers_doc["items"]
     
     if career_name not in current_careers:
         raise HTTPException(status_code=404, detail="Carrera no encontrada")
@@ -2141,8 +2164,7 @@ async def delete_career(career_name: str, request: Request):
     
     await db.settings.update_one(
         {"type": "careers"},
-        {"$set": {"items": current_careers, "updated_at": datetime.now(timezone.utc).isoformat()}},
-        upsert=True
+        {"$set": {"items": current_careers, "updated_at": datetime.now(timezone.utc).isoformat()}}
     )
     
     # Also remove from users' assigned_careers
