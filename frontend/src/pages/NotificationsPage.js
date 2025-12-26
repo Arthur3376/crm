@@ -231,7 +231,7 @@ export default function NotificationsPage() {
           <div className="space-y-2">
             <Label htmlFor="notification_webhook_url" className="flex items-center gap-2">
               <Webhook className="w-4 h-4 text-slate-500" />
-              URL del Webhook (N8N)
+              URL del Webhook (N8N) - Opcional
             </Label>
             <Input
               id="notification_webhook_url"
@@ -243,7 +243,7 @@ export default function NotificationsPage() {
               data-testid="input-webhook-url"
             />
             <p className="text-xs text-slate-500">
-              URL del webhook en N8N donde enviaremos las notificaciones de nuevos leads
+              URL del webhook en N8N como respaldo. Se usará además de WhatsApp si está configurado.
             </p>
           </div>
 
