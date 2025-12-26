@@ -2095,7 +2095,7 @@ async def get_careers():
     careers_doc = await db.settings.find_one({"type": "careers"}, {"_id": 0})
     if careers_doc and careers_doc.get("items"):
         return {"careers": careers_doc["items"]}
-    return {"careers": CAREERS}
+    return {"careers": DEFAULT_CAREERS}
 
 @api_router.post("/careers")
 async def add_career(request: Request):
@@ -2109,7 +2109,7 @@ async def add_career(request: Request):
     
     # Get current careers
     careers_doc = await db.settings.find_one({"type": "careers"}, {"_id": 0})
-    current_careers = careers_doc["items"] if careers_doc else list(CAREERS)
+    current_careers = careers_doc["items"] if careers_doc else list(DEFAULT_CAREERS)
     
     if career_name in current_careers:
         raise HTTPException(status_code=400, detail="La carrera ya existe")
@@ -2132,7 +2132,7 @@ async def delete_career(career_name: str, request: Request):
     
     # Get current careers
     careers_doc = await db.settings.find_one({"type": "careers"}, {"_id": 0})
-    current_careers = careers_doc["items"] if careers_doc else list(CAREERS)
+    current_careers = careers_doc["items"] if careers_doc else list(DEFAULT_CAREERS)
     
     if career_name not in current_careers:
         raise HTTPException(status_code=404, detail="Carrera no encontrada")
