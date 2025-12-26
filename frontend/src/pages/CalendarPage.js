@@ -46,7 +46,7 @@ export default function CalendarPage() {
   const fetchAppointments = async () => {
     try {
       const params = new URLSearchParams();
-      if (selectedAgent) params.append('agent_id', selectedAgent);
+      if (selectedAgent && selectedAgent !== 'all') params.append('agent_id', selectedAgent);
       
       const response = await axios.get(`${API_URL}/api/appointments?${params}`, { withCredentials: true });
       setAppointments(response.data);
