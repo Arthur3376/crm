@@ -396,6 +396,38 @@ export default function UsersPage() {
                 </SelectContent>
               </Select>
             </div>
+            {formData.role === 'agente' && (
+              <div className="form-group">
+                <Label className="flex items-center gap-2">
+                  <GraduationCap className="w-4 h-4" />
+                  Carreras Asignadas
+                </Label>
+                <p className="text-xs text-slate-500 mb-2">
+                  Selecciona las carreras que manejará este agente para la asignación automática de leads
+                </p>
+                <div className="grid grid-cols-2 gap-2 p-3 bg-slate-50 rounded-md border max-h-48 overflow-y-auto">
+                  {CAREERS.map(career => (
+                    <label key={career} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-slate-100 p-1 rounded">
+                      <Checkbox
+                        checked={formData.assigned_careers.includes(career)}
+                        onCheckedChange={() => toggleCareer(career)}
+                        data-testid={`career-checkbox-${career}`}
+                      />
+                      <span>{career}</span>
+                    </label>
+                  ))}
+                </div>
+                {formData.assigned_careers.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {formData.assigned_careers.map(career => (
+                      <span key={career} className="pill-badge bg-blue-100 text-blue-700 border-blue-200 border text-xs">
+                        {career}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setShowCreateModal(false)}>
                 Cancelar
@@ -465,6 +497,38 @@ export default function UsersPage() {
                 </SelectContent>
               </Select>
             </div>
+            {formData.role === 'agente' && (
+              <div className="form-group">
+                <Label className="flex items-center gap-2">
+                  <GraduationCap className="w-4 h-4" />
+                  Carreras Asignadas
+                </Label>
+                <p className="text-xs text-slate-500 mb-2">
+                  Selecciona las carreras que manejará este agente para la asignación automática de leads
+                </p>
+                <div className="grid grid-cols-2 gap-2 p-3 bg-slate-50 rounded-md border max-h-48 overflow-y-auto">
+                  {CAREERS.map(career => (
+                    <label key={career} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-slate-100 p-1 rounded">
+                      <Checkbox
+                        checked={formData.assigned_careers.includes(career)}
+                        onCheckedChange={() => toggleCareer(career)}
+                        data-testid={`edit-career-checkbox-${career}`}
+                      />
+                      <span>{career}</span>
+                    </label>
+                  ))}
+                </div>
+                {formData.assigned_careers.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {formData.assigned_careers.map(career => (
+                      <span key={career} className="pill-badge bg-blue-100 text-blue-700 border-blue-200 border text-xs">
+                        {career}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setShowEditModal(false)}>
                 Cancelar
