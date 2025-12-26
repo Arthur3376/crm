@@ -423,19 +423,16 @@ export default function LeadsPage() {
                               <DropdownMenuItem
                                 onClick={(e) => { 
                                   e.stopPropagation(); 
-                                  const phone = lead.phone.replace(/\D/g, '');
-                                  // Create a temporary link to avoid popup blockers
-                                  const link = document.createElement('a');
-                                  link.href = `https://api.whatsapp.com/send?phone=${phone}`;
-                                  link.target = '_blank';
-                                  link.rel = 'noopener noreferrer';
-                                  document.body.appendChild(link);
-                                  link.click();
-                                  document.body.removeChild(link);
+                                  const phone = lead.phone;
+                                  navigator.clipboard.writeText(phone).then(() => {
+                                    toast.success(`Número copiado: ${phone}`);
+                                  }).catch(() => {
+                                    toast.error('Error al copiar el número');
+                                  });
                                 }}
                               >
                                 <Phone className="w-4 h-4 mr-2" />
-                                WhatsApp
+                                Copiar Teléfono
                               </DropdownMenuItem>
                               {hasRole(['admin', 'gerente']) && (
                                 <DropdownMenuItem
