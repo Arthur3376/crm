@@ -302,7 +302,16 @@ export default function LeadDetailPage() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => window.open(`https://web.whatsapp.com/send?phone=${lead.phone.replace(/\D/g, '')}`, '_blank', 'noopener,noreferrer')}
+                        onClick={() => {
+                          const phone = lead.phone.replace(/\D/g, '');
+                          const link = document.createElement('a');
+                          link.href = `https://api.whatsapp.com/send?phone=${phone}`;
+                          link.target = '_blank';
+                          link.rel = 'noopener noreferrer';
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+                        }}
                         className="text-green-600 hover:text-green-700 h-8 px-2"
                       >
                         <Phone className="w-4 h-4 mr-1" />
