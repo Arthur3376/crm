@@ -326,6 +326,29 @@ def require_roles(allowed_roles: List[str]):
         return user
     return role_checker
 
+async def find_agent_for_career(career: str) -> Optional[dict]:
+    """Find an available agent assigned to handle the given career"""
+    # Find agents with this career assigned, ordered by lead count (load balancing)
+    agents = await db.users.find({
+        "role": "agente",
+        "is_active": True,
+        "assigned_careers": career
+    }, {"_id": 0}).to_list(100)
+    
+    if not agents:
+        # If no agent has this career, return None (will use default assignment)
+        return None
+    
+    # Simple load balancing: count leads per agent and assign to the one with fewer leads
+    agent_lead_counts = []
+    for agent in agents:
+        lead_count = await db.leads.count_documents({"assigned_agent_id": agent["user_id"]})
+        agent_lead_counts.append((agent, lead_count))
+    
+    # Sort by lead count (ascending) and return the agent with fewer leads
+    agent_lead_counts.sort(key=lambda x: x[1])
+    return agent_lead_counts[0][0] if agent_lead_counts else None
+
 # ============== AUTH ENDPOINTS ==============
 
 @api_router.post("/auth/register", response_model=TokenResponse)
