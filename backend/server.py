@@ -79,6 +79,7 @@ class UserBase(BaseModel):
     role: str = "agente"
     phone: Optional[str] = None
     is_active: bool = True
+    assigned_careers: List[str] = []
 
 class UserCreate(BaseModel):
     email: EmailStr
@@ -86,6 +87,7 @@ class UserCreate(BaseModel):
     password: str
     role: str = "agente"
     phone: Optional[str] = None
+    assigned_careers: List[str] = []
 
 class UserLogin(BaseModel):
     email: EmailStr
@@ -96,6 +98,7 @@ class UserUpdate(BaseModel):
     role: Optional[str] = None
     phone: Optional[str] = None
     is_active: Optional[bool] = None
+    assigned_careers: Optional[List[str]] = None
 
 class UserResponse(BaseModel):
     model_config = ConfigDict(extra="ignore")
@@ -106,6 +109,7 @@ class UserResponse(BaseModel):
     phone: Optional[str] = None
     is_active: bool = True
     picture: Optional[str] = None
+    assigned_careers: List[str] = []
     created_at: datetime
 
 class TokenResponse(BaseModel):
