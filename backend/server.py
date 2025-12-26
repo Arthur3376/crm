@@ -245,7 +245,7 @@ class StudentResponse(BaseModel):
     documents: List[dict] = []
     attendance: List[dict] = []
     is_active: bool = True
-    created_at: datetime
+    created_at: str
 
 class ConvertLeadToStudent(BaseModel):
     career_id: str
