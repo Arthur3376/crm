@@ -63,6 +63,12 @@ const DashboardLayout = () => {
       label: 'Webhooks',
       icon: Webhook,
       roles: ['admin', 'gerente']
+    },
+    {
+      path: '/notifications',
+      label: 'Notificaciones',
+      icon: Bell,
+      roles: ['admin', 'gerente']
     }
   ];
 
