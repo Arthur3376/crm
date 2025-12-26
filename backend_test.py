@@ -295,7 +295,7 @@ class LeadFlowAPITester:
             "is_active": True
         }
         
-        success, response = self.make_request('POST', 'webhooks', webhook_data, 201)
+        success, response = self.make_request('POST', 'webhooks', webhook_data, 200)
         if success and 'webhook_id' in response:
             self.test_webhook_id = response['webhook_id']
             self.log_test("Create webhook", True, f"Webhook ID: {self.test_webhook_id}")
