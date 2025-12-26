@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
-import { Card, CardContent } from '../components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
@@ -40,30 +40,29 @@ import {
   MoreVertical,
   Pencil,
   Trash2,
-  UserCircle,
   Mail,
   Phone,
   GraduationCap,
   Key,
-  Users
+  Users,
+  Settings,
+  X
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
-const CAREERS = [
-  'Ingeniería', 'Medicina', 'Derecho', 'Administración',
-  'Contabilidad', 'Psicología', 'Diseño', 'Marketing', 'Otra'
-];
-
 export default function AgentsPage() {
   const { user: currentUser } = useAuth();
   const [agents, setAgents] = useState([]);
+  const [careers, setCareers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showResetPasswordModal, setShowResetPasswordModal] = useState(false);
+  const [showCareersModal, setShowCareersModal] = useState(false);
   const [selectedAgent, setSelectedAgent] = useState(null);
+  const [newCareerName, setNewCareerName] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -75,12 +74,21 @@ export default function AgentsPage() {
 
   useEffect(() => {
     fetchAgents();
+    fetchCareers();
   }, []);
+
+  const fetchCareers = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/api/constants/careers`, { withCredentials: true });
+      setCareers(response.data.careers || []);
+    } catch (error) {
+      console.error('Error fetching careers:', error);
+    }
+  };
 
   const fetchAgents = async () => {
     try {
       const response = await axios.get(`${API_URL}/api/users`, { withCredentials: true });
-      // Filter only agents
       const agentsOnly = response.data.filter(u => u.role === 'agente');
       setAgents(agentsOnly);
     } catch (error) {
@@ -88,6 +96,38 @@ export default function AgentsPage() {
       toast.error('Error al cargar los agentes');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleAddCareer = async () => {
+    if (!newCareerName.trim()) {
+      toast.error('Ingresa un nombre de carrera');
+      return;
+    }
+    try {
+      const response = await axios.post(`${API_URL}/api/careers`, 
+        { name: newCareerName.trim() }, 
+        { withCredentials: true }
+      );
+      setCareers(response.data.careers);
+      setNewCareerName('');
+      toast.success('Carrera agregada');
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Error al agregar carrera');
+    }
+  };
+
+  const handleDeleteCareer = async (careerName) => {
+    if (!window.confirm(`¿Eliminar la carrera "${careerName}"? Se quitará de todos los agentes.`)) return;
+    try {
+      const response = await axios.delete(`${API_URL}/api/careers/${encodeURIComponent(careerName)}`, 
+        { withCredentials: true }
+      );
+      setCareers(response.data.careers);
+      toast.success('Carrera eliminada');
+      fetchAgents(); // Refresh agents to update their careers
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Error al eliminar carrera');
     }
   };
 
@@ -146,7 +186,6 @@ export default function AgentsPage() {
 
   const handleDeleteAgent = async (userId) => {
     if (!window.confirm('¿Estás seguro de eliminar este agente?')) return;
-    
     try {
       await axios.delete(`${API_URL}/api/users/${userId}`, { withCredentials: true });
       toast.success('Agente eliminado');
@@ -219,14 +258,24 @@ export default function AgentsPage() {
             {agents.length} agente{agents.length !== 1 ? 's' : ''} registrado{agents.length !== 1 ? 's' : ''}
           </p>
         </div>
-        <Button
-          onClick={() => { resetForm(); setShowCreateModal(true); }}
-          className="bg-slate-900 hover:bg-slate-800 text-white"
-          data-testid="create-agent-btn"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Nuevo Agente
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setShowCareersModal(true)}
+            data-testid="manage-careers-btn"
+          >
+            <Settings className="w-4 h-4 mr-2" />
+            Gestionar Carreras
+          </Button>
+          <Button
+            onClick={() => { resetForm(); setShowCreateModal(true); }}
+            className="bg-slate-900 hover:bg-slate-800 text-white"
+            data-testid="create-agent-btn"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Nuevo Agente
+          </Button>
+        </div>
       </div>
 
       {/* Info Card */}
@@ -238,7 +287,7 @@ export default function AgentsPage() {
               <h3 className="font-medium text-blue-900">Asignación Automática de Leads</h3>
               <p className="text-sm text-blue-700 mt-1">
                 Los leads se asignan automáticamente a los agentes según la carrera de interés del lead 
-                y las carreras asignadas a cada agente. Asegúrate de configurar las carreras de cada agente.
+                y las carreras asignadas a cada agente. Usa "Gestionar Carreras" para agregar o eliminar carreras.
               </p>
             </div>
           </div>
@@ -364,6 +413,64 @@ export default function AgentsPage() {
         </CardContent>
       </Card>
 
+      {/* Manage Careers Modal */}
+      <Dialog open={showCareersModal} onOpenChange={setShowCareersModal}>
+        <DialogContent className="sm:max-w-md" data-testid="careers-modal">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <GraduationCap className="w-5 h-5" />
+              Gestionar Carreras
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex gap-2">
+              <Input
+                placeholder="Nombre de nueva carrera"
+                value={newCareerName}
+                onChange={(e) => setNewCareerName(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleAddCareer()}
+                data-testid="input-new-career"
+              />
+              <Button onClick={handleAddCareer} data-testid="add-career-btn">
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+            <div className="border rounded-md max-h-64 overflow-y-auto">
+              {careers.length > 0 ? (
+                <div className="divide-y">
+                  {careers.map((career, idx) => (
+                    <div key={idx} className="flex items-center justify-between p-3 hover:bg-slate-50">
+                      <span className="text-sm">{career}</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteCareer(career)}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0"
+                        data-testid={`delete-career-${career}`}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-4 text-center text-slate-500 text-sm">
+                  No hay carreras configuradas
+                </div>
+              )}
+            </div>
+            <p className="text-xs text-slate-500">
+              Las carreras se usan para la asignación automática de leads a los agentes.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCareersModal(false)}>
+              Cerrar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Create Agent Modal */}
       <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
         <DialogContent className="sm:max-w-md" data-testid="create-agent-modal">
@@ -422,7 +529,7 @@ export default function AgentsPage() {
                 Selecciona las carreras que manejará este agente
               </p>
               <div className="grid grid-cols-2 gap-2 p-3 bg-slate-50 rounded-md border max-h-48 overflow-y-auto">
-                {CAREERS.map(career => (
+                {careers.map(career => (
                   <label key={career} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-slate-100 p-1 rounded">
                     <Checkbox
                       checked={formData.assigned_careers.includes(career)}
@@ -503,7 +610,7 @@ export default function AgentsPage() {
                 Selecciona las carreras que manejará este agente
               </p>
               <div className="grid grid-cols-2 gap-2 p-3 bg-slate-50 rounded-md border max-h-48 overflow-y-auto">
-                {CAREERS.map(career => (
+                {careers.map(career => (
                   <label key={career} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-slate-100 p-1 rounded">
                     <Checkbox
                       checked={formData.assigned_careers.includes(career)}
