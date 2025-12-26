@@ -303,20 +303,16 @@ export default function LeadDetailPage() {
                         variant="ghost"
                         size="sm"
                         onClick={() => {
-                          const phone = lead.phone.replace(/\D/g, '');
-                          const link = document.createElement('a');
-                          link.href = `https://api.whatsapp.com/send?phone=${phone}`;
-                          link.target = '_blank';
-                          link.rel = 'noopener noreferrer';
-                          document.body.appendChild(link);
-                          link.click();
-                          document.body.removeChild(link);
+                          navigator.clipboard.writeText(lead.phone).then(() => {
+                            toast.success(`Número copiado: ${lead.phone}`);
+                          }).catch(() => {
+                            toast.error('Error al copiar el número');
+                          });
                         }}
                         className="text-green-600 hover:text-green-700 h-8 px-2"
                       >
                         <Phone className="w-4 h-4 mr-1" />
-                        WhatsApp
-                        <ExternalLink className="w-3 h-3 ml-1" />
+                        Copiar
                       </Button>
                     </div>
                   )}
