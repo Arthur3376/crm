@@ -424,7 +424,14 @@ export default function LeadsPage() {
                                 onClick={(e) => { 
                                   e.stopPropagation(); 
                                   const phone = lead.phone.replace(/\D/g, '');
-                                  window.open(`https://web.whatsapp.com/send?phone=${phone}`, '_blank', 'noopener,noreferrer'); 
+                                  // Create a temporary link to avoid popup blockers
+                                  const link = document.createElement('a');
+                                  link.href = `https://api.whatsapp.com/send?phone=${phone}`;
+                                  link.target = '_blank';
+                                  link.rel = 'noopener noreferrer';
+                                  document.body.appendChild(link);
+                                  link.click();
+                                  document.body.removeChild(link);
                                 }}
                               >
                                 <Phone className="w-4 h-4 mr-2" />
