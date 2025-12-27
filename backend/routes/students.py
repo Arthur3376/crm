@@ -593,6 +593,53 @@ async def delete_document(student_id: str, document_id: str, request: Request):
     return {"message": "Documento eliminado"}
 
 
+@router.get("/{student_id}/documents/{document_id}/download")
+async def download_document(student_id: str, document_id: str, request: Request):
+    """Download a document"""
+    from fastapi.responses import FileResponse
+    
+    await get_current_user(request)
+    
+    student = await db.students.find_one({"student_id": student_id}, {"_id": 0})
+    if not student:
+        raise HTTPException(status_code=404, detail="Estudiante no encontrado")
+    
+    # Find document
+    document = None
+    for doc in student.get("documents", []):
+        if doc["document_id"] == document_id:
+            document = doc
+            break
+    
+    if not document:
+        raise HTTPException(status_code=404, detail="Documento no encontrado")
+    
+    file_path = STUDENT_DOCUMENTS_PATH / student_id / document["filename"]
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="Archivo no encontrado")
+    
+    # Determine content type based on file extension
+    extension = document["filename"].lower().split(".")[-1] if "." in document["filename"] else ""
+    content_types = {
+        "pdf": "application/pdf",
+        "doc": "application/msword",
+        "docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "jpg": "image/jpeg",
+        "jpeg": "image/jpeg",
+        "png": "image/png",
+        "gif": "image/gif"
+    }
+    media_type = content_types.get(extension, "application/octet-stream")
+    
+    original_filename = document.get("original_filename", document["filename"])
+    
+    return FileResponse(
+        path=str(file_path),
+        media_type=media_type,
+        filename=original_filename
+    )
+
+
 # Attendance management
 @router.post("/{student_id}/attendance")
 async def record_attendance(student_id: str, request: Request):
