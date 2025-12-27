@@ -75,12 +75,12 @@ class UCICAPITester:
             return False, {"error": str(e)}
 
     def test_auth_login(self):
-        """Test login with test credentials"""
+        """Test login with UCIC test credentials"""
         success, response = self.make_request(
             'POST', 
             'auth/login',
             {
-                "email": "admin@leadflow.com",
+                "email": "arojaaro@gmail.com",
                 "password": "admin123"
             },
             auth_required=False
@@ -89,10 +89,10 @@ class UCICAPITester:
         if success and 'token' in response:
             self.token = response['token']
             self.user_data = response.get('user', {})
-            self.log_test("Login with test credentials", True, f"User: {self.user_data.get('name', 'Unknown')}")
+            self.log_test("Login with UCIC credentials", True, f"User: {self.user_data.get('name', 'Unknown')}, Role: {self.user_data.get('role', 'Unknown')}")
             return True
         else:
-            self.log_test("Login with test credentials", False, "", response.get('detail', 'Login failed'))
+            self.log_test("Login with UCIC credentials", False, "", response.get('detail', 'Login failed'))
             return False
 
     def test_auth_me(self):
