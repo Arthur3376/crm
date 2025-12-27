@@ -339,7 +339,7 @@ class UCICAPITester:
         }
 
 def main():
-    tester = LeadFlowAPITester()
+    tester = UCICAPITester()
     success = tester.run_all_tests()
     
     # Save detailed results
