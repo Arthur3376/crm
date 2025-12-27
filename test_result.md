@@ -193,11 +193,11 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Dashboard Recent Leads Endpoint"
-    - "Document Download Functionality"
-    - "Excel Export Functionality"
-    - "PDF Export Functionality"
-    - "Student Attendance Recording"
+    - "Login Functionality"
+    - "Dashboard Data Display"
+    - "Student Data Export Functionality"
+    - "Students Documents Access"
+    - "Navigation Regression"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
