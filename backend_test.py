@@ -258,6 +258,74 @@ class UCICAPITester:
         else:
             self.log_test("Export to PDF", False, "", response.get('detail', 'Failed to export to PDF'))
 
+    def test_dashboard_recent_leads(self):
+        """Test dashboard recent leads endpoint"""
+        # Test without limit
+        success, response = self.make_request('GET', 'dashboard/recent-leads')
+        if success:
+            leads_count = len(response) if isinstance(response, list) else 0
+            self.log_test("Get dashboard recent leads", True, f"Found {leads_count} recent leads")
+        else:
+            self.log_test("Get dashboard recent leads", False, "", response.get('detail', 'Failed to get recent leads'))
+        
+        # Test with limit parameter
+        success, response = self.make_request('GET', 'dashboard/recent-leads?limit=3')
+        if success:
+            leads_count = len(response) if isinstance(response, list) else 0
+            expected_limit = min(3, leads_count) if leads_count > 0 else 0
+            self.log_test("Get dashboard recent leads with limit", True, f"Found {leads_count} recent leads (limit=3)")
+        else:
+            self.log_test("Get dashboard recent leads with limit", False, "", response.get('detail', 'Failed to get recent leads with limit'))
+
+    def test_document_download(self):
+        """Test document download functionality"""
+        if not self.test_student_id:
+            self.log_test("Document download test", False, "", "No test student ID available")
+            return
+        
+        # First get student details to check if they have documents
+        success, student_response = self.make_request('GET', f'students/{self.test_student_id}')
+        if not success:
+            self.log_test("Document download test", False, "", "Failed to get student details for document test")
+            return
+        
+        documents = student_response.get('documents', [])
+        if not documents:
+            self.log_test("Document download test", True, "No documents found for student (expected for test data)")
+            return
+        
+        # Try to download the first document
+        document_id = documents[0].get('document_id')
+        if document_id:
+            success, response = self.make_request('GET', f'students/{self.test_student_id}/documents/{document_id}/download')
+            if success:
+                content_type = response.get('content_type', '')
+                content_length = response.get('content_length', 0)
+                self.log_test("Document download", True, f"Document downloaded successfully (type: {content_type}, size: {content_length} bytes)")
+            else:
+                self.log_test("Document download", False, "", response.get('detail', 'Failed to download document'))
+        else:
+            self.log_test("Document download test", False, "", "No valid document ID found")
+
+    def test_student_attendance(self):
+        """Test student attendance recording"""
+        if not self.test_student_id:
+            self.log_test("Student attendance test", False, "", "No test student ID available")
+            return
+        
+        attendance_data = {
+            "date": "2024-12-27",
+            "subject": "Matemáticas",
+            "status": "presente",
+            "notes": "Test attendance record"
+        }
+        
+        success, response = self.make_request('POST', f'students/{self.test_student_id}/attendance', attendance_data)
+        if success:
+            self.log_test("Record student attendance", True, "Attendance recorded successfully")
+        else:
+            self.log_test("Record student attendance", False, "", response.get('detail', 'Failed to record attendance'))
+
     def test_regression_endpoints(self):
         """Test other core endpoints for regression"""
         endpoints = [
