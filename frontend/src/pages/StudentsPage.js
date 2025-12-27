@@ -478,6 +478,9 @@ export default function StudentsPage() {
                           <span className="text-xs text-slate-400">
                             {new Date(doc.uploaded_at).toLocaleDateString('es-ES')}
                           </span>
+                          <Button variant="ghost" size="sm" onClick={() => handleDownloadDocument(doc.document_id, doc.original_filename || doc.filename)} className="text-blue-600 h-8 w-8 p-0">
+                            <Download className="w-4 h-4" />
+                          </Button>
                           <Button variant="ghost" size="sm" onClick={() => handleDeleteDocument(doc.document_id)} className="text-red-600 h-8 w-8 p-0">
                             <Trash2 className="w-4 h-4" />
                           </Button>
