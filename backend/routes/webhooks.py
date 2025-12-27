@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException, Request
 from typing import List
 from datetime import datetime, timezone
 
-from config import db, logger
+import sys; sys.path.insert(0, "/app/backend"); from config import db, logger
 from models.webhooks import (
     WebhookCreate, WebhookResponse,
     NotificationSettingsUpdate, NotificationSettingsResponse,

@@ -6,7 +6,7 @@ from fastapi.responses import RedirectResponse
 from datetime import datetime, timezone, timedelta
 import os
 
-from config import db, logger, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_CALENDAR_SCOPES
+import sys; sys.path.insert(0, "/app/backend"); from config import db, logger, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_CALENDAR_SCOPES
 from utils.auth import get_current_user
 
 router = APIRouter(prefix="/auth/google/calendar", tags=["calendar"])

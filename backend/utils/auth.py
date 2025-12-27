@@ -5,7 +5,7 @@ from fastapi import HTTPException, Request
 from typing import List
 from datetime import datetime, timezone, timedelta
 
-from config import db, JWT_SECRET, JWT_ALGORITHM, JWT_EXPIRATION_HOURS
+import sys; sys.path.insert(0, "/app/backend"); from config import db, JWT_SECRET, JWT_ALGORITHM, JWT_EXPIRATION_HOURS
 
 
 def hash_password(password: str) -> str:

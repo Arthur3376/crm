@@ -2,7 +2,7 @@
 from fastapi import APIRouter, Request
 from datetime import datetime, timezone, timedelta
 
-from config import db
+import sys; sys.path.insert(0, "/app/backend"); from config import db
 from models.dashboard import DashboardStats
 from utils.auth import get_current_user
 
@@ -113,7 +113,7 @@ async def get_career_options(request: Request):
         return {"careers": career_names}
     
     # Fall back to default careers
-    from config import DEFAULT_CAREERS
+    import sys; sys.path.insert(0, "/app/backend"); from config import DEFAULT_CAREERS
     return {"careers": DEFAULT_CAREERS}
 
 
@@ -121,7 +121,7 @@ async def get_career_options(request: Request):
 async def get_source_options(request: Request):
     """Get list of lead sources for dropdowns"""
     await get_current_user(request)
-    from config import LEAD_SOURCES
+    import sys; sys.path.insert(0, "/app/backend"); from config import LEAD_SOURCES
     return {"sources": LEAD_SOURCES}
 
 
@@ -129,5 +129,5 @@ async def get_source_options(request: Request):
 async def get_status_options(request: Request):
     """Get list of lead statuses for dropdowns"""
     await get_current_user(request)
-    from config import LEAD_STATUSES
+    import sys; sys.path.insert(0, "/app/backend"); from config import LEAD_STATUSES
     return {"statuses": LEAD_STATUSES}

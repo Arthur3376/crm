@@ -6,7 +6,7 @@ from fastapi import APIRouter, HTTPException, Request, Response
 from datetime import datetime, timezone, timedelta
 import os
 
-from config import db, logger, RESEND_API_KEY, SENDER_EMAIL
+import sys; sys.path.insert(0, "/app/backend"); from config import db, logger, RESEND_API_KEY, SENDER_EMAIL
 from models.users import (
     UserCreate, UserLogin, UserResponse, TokenResponse,
     ForgotPasswordRequest, ResetPasswordRequest

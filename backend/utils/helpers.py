@@ -5,7 +5,7 @@ from typing import Optional
 from datetime import datetime, timezone
 from fastapi import Request
 
-from config import db, logger, twilio_client, TWILIO_WHATSAPP_NUMBER
+import sys; sys.path.insert(0, "/app/backend"); from config import db, logger, twilio_client, TWILIO_WHATSAPP_NUMBER
 
 
 async def find_agent_for_career(career: str) -> Optional[dict]:

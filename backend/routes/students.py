@@ -15,7 +15,7 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, 
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 
-from config import db, logger, STUDENT_DOCUMENTS_PATH
+import sys; sys.path.insert(0, "/app/backend"); from config import db, logger, STUDENT_DOCUMENTS_PATH
 from models.students import StudentCreate, StudentUpdate, StudentResponse, ConvertLeadToStudent
 from utils.auth import get_current_user, require_roles
 from utils.helpers import create_audit_log

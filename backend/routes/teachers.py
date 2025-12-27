@@ -4,7 +4,7 @@ from fastapi import APIRouter, HTTPException, Request
 from typing import List
 from datetime import datetime, timezone
 
-from config import db, logger
+import sys; sys.path.insert(0, "/app/backend"); from config import db, logger
 from models.teachers import TeacherCreate, TeacherUpdate, TeacherResponse
 from utils.auth import get_current_user, require_roles
 
