@@ -74,11 +74,12 @@ export default function LoginPage() {
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-slate-50">
         <div className="w-full max-w-md animate-fade-in">
           {/* Logo */}
-          <div className="flex items-center gap-2 mb-8">
-            <div className="w-10 h-10 bg-slate-900 rounded-md flex items-center justify-center">
-              <span className="text-white font-bold text-lg">UC</span>
-            </div>
-            <span className="font-semibold text-slate-900 text-xl tracking-tight">UCIC</span>
+          <div className="flex items-center justify-center mb-8">
+            <img 
+              src="/logo-ucic.png" 
+              alt="UCIC Logo" 
+              className="h-16 w-auto object-contain"
+            />
           </div>
 
           {/* Title */}
