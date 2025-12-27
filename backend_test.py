@@ -64,10 +64,22 @@ class UCICAPITester:
                 return False, {"error": f"Unsupported method: {method}"}
             
             success = response.status_code == expected_status
-            try:
-                response_data = response.json()
-            except:
-                response_data = {"status_code": response.status_code, "text": response.text}
+            
+            # Handle binary responses (like file downloads)
+            content_type = response.headers.get('content-type', '')
+            if 'application/json' in content_type:
+                try:
+                    response_data = response.json()
+                except:
+                    response_data = {"status_code": response.status_code, "text": response.text}
+            else:
+                # For binary responses, return basic info
+                response_data = {
+                    "status_code": response.status_code,
+                    "content_type": content_type,
+                    "content_length": len(response.content),
+                    "headers": dict(response.headers)
+                }
             
             return success, response_data
             
