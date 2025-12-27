@@ -154,10 +154,11 @@ const DashboardLayout = () => {
         {/* Logo */}
         <div className="h-16 flex items-center justify-between px-4 border-b border-slate-200">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-slate-900 rounded-md flex items-center justify-center">
-              <span className="text-white font-bold text-sm">UC</span>
-            </div>
-            <span className="font-semibold text-slate-900 text-lg tracking-tight">UCIC</span>
+            <img 
+              src="/logo-ucic.png" 
+              alt="UCIC Logo" 
+              className="h-10 w-auto object-contain"
+            />
           </div>
           <button
             onClick={() => setSidebarOpen(false)}
