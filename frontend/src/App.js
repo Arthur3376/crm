@@ -13,6 +13,7 @@ import AgentsPage from './pages/AgentsPage';
 import TeachersPage from './pages/TeachersPage';
 import CareersPage from './pages/CareersPage';
 import StudentsPage from './pages/StudentsPage';
+import StudentDataPage from './pages/StudentDataPage';
 import CalendarPage from './pages/CalendarPage';
 import WebhooksPage from './pages/WebhooksPage';
 import NotificationsPage from './pages/NotificationsPage';
