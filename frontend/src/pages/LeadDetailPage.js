@@ -110,7 +110,7 @@ export default function LeadDetailPage() {
     try {
       const [leadRes, convRes] = await Promise.all([
         axios.get(`${API_URL}/api/leads/${leadId}`, { withCredentials: true }),
-        axios.get(`${API_URL}/api/conversations/${leadId}`, { withCredentials: true })
+        axios.get(`${API_URL}/api/leads/${leadId}/conversations`, { withCredentials: true })
       ]);
       setLead(leadRes.data);
       setConversation(convRes.data);
