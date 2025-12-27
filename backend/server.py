@@ -636,7 +636,7 @@ async def forgot_password(request_data: ForgotPasswordRequest):
     
     # Send email with Resend
     if RESEND_API_KEY:
-        frontend_url = os.environ.get('FRONTEND_URL', 'https://leadsync-16.preview.emergentagent.com')
+        frontend_url = os.environ.get('FRONTEND_URL', 'https://campus-flow-8.preview.emergentagent.com')
         reset_link = f"{frontend_url}/forgot-password?token={reset_token}"
         
         html_content = f"""
@@ -2809,11 +2809,11 @@ async def get_whatsapp_status(request: Request):
 
 def get_frontend_url():
     """Get frontend URL for redirects"""
-    return os.environ.get('FRONTEND_URL', 'https://leadsync-16.preview.emergentagent.com')
+    return os.environ.get('FRONTEND_URL', 'https://campus-flow-8.preview.emergentagent.com')
 
 def get_google_redirect_uri():
     """Get Google OAuth redirect URI"""
-    backend_url = os.environ.get('REACT_APP_BACKEND_URL', 'https://leadsync-16.preview.emergentagent.com')
+    backend_url = os.environ.get('REACT_APP_BACKEND_URL', 'https://campus-flow-8.preview.emergentagent.com')
     return f"{backend_url}/api/auth/google/calendar/callback"
 
 @api_router.get("/auth/google/calendar/login")

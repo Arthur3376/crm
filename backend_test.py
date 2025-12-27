@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 from typing import Dict, Any, Optional
 
 class LeadFlowAPITester:
-    def __init__(self, base_url: str = "https://leadsync-16.preview.emergentagent.com"):
+    def __init__(self, base_url: str = "https://campus-flow-8.preview.emergentagent.com"):
         self.base_url = base_url
         self.session = requests.Session()
         self.token = None
