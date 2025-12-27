@@ -20,11 +20,10 @@ class UCICAPITester:
         self.tests_passed = 0
         self.test_results = []
         
-        # Test data
-        self.test_lead_id = None
-        self.test_appointment_id = None
-        self.test_webhook_id = None
-        self.test_conversation_id = None
+        # Test data for UCIC
+        self.test_student_id = None
+        self.test_custom_field_id = None
+        self.test_change_request_id = None
 
     def log_test(self, name: str, success: bool, details: str = "", error: str = ""):
         """Log test result"""
