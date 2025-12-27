@@ -159,7 +159,7 @@ export default function LeadDetailPage() {
     if (!newMessage.trim()) return;
 
     try {
-      await axios.post(`${API_URL}/api/conversations`, {
+      await axios.post(`${API_URL}/api/leads/${leadId}/conversations`, {
         lead_id: leadId,
         message: newMessage,
         sender: 'agent'
