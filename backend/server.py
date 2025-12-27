@@ -199,7 +199,7 @@ class CareerResponse(BaseModel):
     modality: str = "presencial"
     schedules: List[dict] = []
     is_active: bool = True
-    created_at: datetime
+    created_at: str
 
 # Student Models
 class StudentDocument(BaseModel):
@@ -1064,7 +1064,7 @@ async def create_career_full(career_data: CareerCreate, request: Request):
         )
     
     logger.info(f"Career created: {career_id}")
-    return CareerResponse(**career, created_at=now)
+    return CareerResponse(**career)
 
 @api_router.get("/careers/full", response_model=List[CareerResponse])
 async def get_careers_full(request: Request):
@@ -1072,7 +1072,7 @@ async def get_careers_full(request: Request):
     await get_current_user(request)
     
     careers = await db.careers_full.find({}, {"_id": 0}).to_list(1000)
-    return [CareerResponse(**c, created_at=datetime.fromisoformat(c["created_at"])) for c in careers]
+    return [CareerResponse(**c) for c in careers]
 
 @api_router.get("/careers/full/{career_id}", response_model=CareerResponse)
 async def get_career_full(career_id: str, request: Request):
@@ -1083,7 +1083,7 @@ async def get_career_full(career_id: str, request: Request):
     if not career:
         raise HTTPException(status_code=404, detail="Carrera no encontrada")
     
-    return CareerResponse(**career, created_at=datetime.fromisoformat(career["created_at"]))
+    return CareerResponse(**career)
 
 @api_router.put("/careers/full/{career_id}", response_model=CareerResponse)
 async def update_career_full(career_id: str, career_data: CareerUpdate, request: Request):
@@ -1116,7 +1116,7 @@ async def update_career_full(career_id: str, career_data: CareerUpdate, request:
     await db.careers_full.update_one({"career_id": career_id}, {"$set": update_data})
     
     updated_career = await db.careers_full.find_one({"career_id": career_id}, {"_id": 0})
-    return CareerResponse(**updated_career, created_at=datetime.fromisoformat(updated_career["created_at"]))
+    return CareerResponse(**updated_career)
 
 @api_router.delete("/careers/full/{career_id}")
 async def delete_career_full(career_id: str, request: Request):
