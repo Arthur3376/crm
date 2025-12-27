@@ -131,3 +131,28 @@ async def get_status_options(request: Request):
     await get_current_user(request)
     import sys; sys.path.insert(0, "/app/backend"); from config import LEAD_STATUSES
     return {"statuses": LEAD_STATUSES}
+
+
+@router.get("/recent-leads")
+async def get_recent_leads(request: Request, limit: int = 5):
+    """Get recent leads for dashboard"""
+    current_user = await get_current_user(request)
+    
+    # Base query for role-based filtering
+    query = {}
+    if current_user["role"] == "agente":
+        query["assigned_agent_id"] = current_user["user_id"]
+    
+    leads = await db.leads.find(query, {"_id": 0}).sort("created_at", -1).limit(limit).to_list(limit)
+    
+    # Get agent names
+    agent_ids = list(set([l.get("assigned_agent_id") for l in leads if l.get("assigned_agent_id")]))
+    agents = await db.users.find({"user_id": {"$in": agent_ids}}, {"_id": 0}).to_list(1000)
+    agent_map = {a["user_id"]: a["name"] for a in agents}
+    
+    # Add agent names to leads
+    for lead in leads:
+        if lead.get("assigned_agent_id"):
+            lead["assigned_agent_name"] = agent_map.get(lead["assigned_agent_id"])
+    
+    return leads
