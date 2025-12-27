@@ -15,7 +15,8 @@ import {
   GraduationCap,
   BookOpen,
   School,
-  UserCheck
+  UserCheck,
+  Database
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
 import {
@@ -79,6 +80,12 @@ const DashboardLayout = () => {
       label: 'Estudiantes',
       icon: UserCheck,
       roles: ['admin', 'gerente']
+    },
+    {
+      path: '/student-data',
+      label: 'Datos Estudiantes',
+      icon: Database,
+      roles: ['admin', 'gerente', 'supervisor']
     },
     {
       path: '/users',
