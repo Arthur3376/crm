@@ -372,6 +372,9 @@ class UCICAPITester:
         self.test_students_list()
         self.test_student_detail()
         
+        # NEW: Dashboard recent leads test
+        self.test_dashboard_recent_leads()
+        
         # Custom fields tests
         self.test_custom_fields_get()
         self.test_custom_fields_create()
@@ -390,6 +393,12 @@ class UCICAPITester:
         # Export functionality
         self.test_export_excel()
         self.test_export_pdf()
+        
+        # NEW: Document download test
+        self.test_document_download()
+        
+        # NEW: Student attendance test
+        self.test_student_attendance()
         
         # Regression tests
         self.test_regression_endpoints()
