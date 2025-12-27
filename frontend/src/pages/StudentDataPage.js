@@ -173,7 +173,7 @@ export default function StudentDataPage() {
 
   const handleApproveRequest = async (requestId) => {
     try {
-      await axios.post(`${API_URL}/api/change-requests/${requestId}/approve`, {}, { withCredentials: true });
+      await axios.post(`${API_URL}/api/students/change-requests/${requestId}/approve`, {}, { withCredentials: true });
       toast.success('Cambio aprobado');
       fetchData();
     } catch (error) {
@@ -184,7 +184,7 @@ export default function StudentDataPage() {
   const handleRejectRequest = async (requestId) => {
     const reason = window.prompt('Razón del rechazo (opcional):');
     try {
-      await axios.post(`${API_URL}/api/change-requests/${requestId}/reject`, { reason }, { withCredentials: true });
+      await axios.post(`${API_URL}/api/students/change-requests/${requestId}/reject`, { reason }, { withCredentials: true });
       toast.success('Cambio rechazado');
       fetchData();
     } catch (error) {
