@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-LeadFlow Pro Backend API Testing Suite
-Tests all endpoints with the test user: admin@leadflow.com / admin123
+UCIC Student Data Management Backend API Testing Suite
+Tests all endpoints with the test user: arojaaro@gmail.com / admin123
 """
 
 import requests
@@ -10,7 +10,7 @@ import json
 from datetime import datetime, timedelta
 from typing import Dict, Any, Optional
 
-class LeadFlowAPITester:
+class UCICAPITester:
     def __init__(self, base_url: str = "https://campus-flow-8.preview.emergentagent.com"):
         self.base_url = base_url
         self.session = requests.Session()
