@@ -1480,6 +1480,506 @@ async def get_student_documents_folder(student_id: str, request: Request):
         "vpn_note": "Para acceso VPN, configura tu servidor VPN para exponer /app/student_documents/"
     }
 
+# ============== CUSTOM FIELDS ENDPOINTS ==============
+
+@api_router.get("/students/custom-fields")
+async def get_custom_fields(request: Request):
+    """Get all custom field definitions"""
+    await get_current_user(request)
+    fields = await db.custom_fields.find({}, {"_id": 0}).sort("order", 1).to_list(100)
+    return {"fields": fields}
+
+@api_router.post("/students/custom-fields")
+async def create_custom_field(request: Request):
+    """Create a new custom field definition"""
+    current_user = await require_roles(["admin", "gerente"])(request)
+    body = await request.json()
+    
+    field_id = f"field_{uuid.uuid4().hex[:8]}"
+    now = datetime.now(timezone.utc)
+    
+    # Get max order
+    last_field = await db.custom_fields.find_one(sort=[("order", -1)])
+    next_order = (last_field["order"] + 1) if last_field else 0
+    
+    field = {
+        "field_id": field_id,
+        "field_name": body.get("field_name", ""),
+        "field_type": body.get("field_type", "text"),
+        "options": body.get("options", []),
+        "required": body.get("required", False),
+        "visible_to_students": body.get("visible_to_students", True),
+        "editable_by_supervisor": body.get("editable_by_supervisor", True),
+        "order": next_order,
+        "created_at": now.isoformat(),
+        "created_by": current_user["user_id"]
+    }
+    
+    await db.custom_fields.insert_one(field)
+    field.pop("_id", None)
+    
+    # Log the action
+    await create_audit_log(
+        entity_type="custom_field",
+        entity_id=field_id,
+        action="create",
+        performed_by=current_user,
+        new_value=field,
+        request=request
+    )
+    
+    return {"field": field, "message": "Campo creado exitosamente"}
+
+@api_router.put("/students/custom-fields/{field_id}")
+async def update_custom_field(field_id: str, request: Request):
+    """Update a custom field definition"""
+    current_user = await require_roles(["admin", "gerente"])(request)
+    body = await request.json()
+    
+    field = await db.custom_fields.find_one({"field_id": field_id}, {"_id": 0})
+    if not field:
+        raise HTTPException(status_code=404, detail="Campo no encontrado")
+    
+    update_data = {k: v for k, v in body.items() if k in ["field_name", "field_type", "options", "required", "visible_to_students", "editable_by_supervisor", "order"]}
+    update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
+    
+    await db.custom_fields.update_one({"field_id": field_id}, {"$set": update_data})
+    
+    await create_audit_log(
+        entity_type="custom_field",
+        entity_id=field_id,
+        action="update",
+        performed_by=current_user,
+        old_value=field,
+        new_value=update_data,
+        request=request
+    )
+    
+    return {"message": "Campo actualizado"}
+
+@api_router.delete("/students/custom-fields/{field_id}")
+async def delete_custom_field(field_id: str, request: Request):
+    """Delete a custom field definition"""
+    current_user = await require_roles(["admin"])(request)
+    
+    result = await db.custom_fields.delete_one({"field_id": field_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Campo no encontrado")
+    
+    # Remove field values from all students
+    await db.students.update_many({}, {"$unset": {f"custom_fields.{field_id}": ""}})
+    
+    await create_audit_log(
+        entity_type="custom_field",
+        entity_id=field_id,
+        action="delete",
+        performed_by=current_user,
+        request=request
+    )
+    
+    return {"message": "Campo eliminado"}
+
+@api_router.put("/students/{student_id}/custom-fields")
+async def update_student_custom_fields(student_id: str, request: Request):
+    """Update custom field values for a student"""
+    current_user = await get_current_user(request)
+    body = await request.json()
+    
+    student = await db.students.find_one({"student_id": student_id}, {"_id": 0})
+    if not student:
+        raise HTTPException(status_code=404, detail="Estudiante no encontrado")
+    
+    # Check permissions
+    user_role = current_user["role"]
+    
+    # Students can only view
+    if user_role == "alumno":
+        raise HTTPException(status_code=403, detail="Los alumnos no pueden modificar datos")
+    
+    # Supervisors need approval for changes
+    if user_role == "supervisor":
+        # Create change requests instead of direct updates
+        changes = body.get("fields", {})
+        old_custom_fields = student.get("custom_fields", {})
+        
+        for field_id, new_value in changes.items():
+            field_def = await db.custom_fields.find_one({"field_id": field_id}, {"_id": 0})
+            if not field_def:
+                continue
+                
+            if not field_def.get("editable_by_supervisor", True):
+                continue
+            
+            old_value = old_custom_fields.get(field_id)
+            if old_value != new_value:
+                request_id = f"req_{uuid.uuid4().hex[:8]}"
+                now = datetime.now(timezone.utc)
+                
+                change_request = {
+                    "request_id": request_id,
+                    "student_id": student_id,
+                    "student_name": student["full_name"],
+                    "field_id": field_id,
+                    "field_name": field_def["field_name"],
+                    "old_value": old_value,
+                    "new_value": new_value,
+                    "requested_by_id": current_user["user_id"],
+                    "requested_by_name": current_user["name"],
+                    "status": "pending",
+                    "created_at": now.isoformat()
+                }
+                
+                await db.change_requests.insert_one(change_request)
+        
+        return {"message": "Solicitud de cambio enviada para aprobación", "requires_approval": True}
+    
+    # Admin/Gerente can update directly
+    changes = body.get("fields", {})
+    old_custom_fields = student.get("custom_fields", {})
+    
+    for field_id, new_value in changes.items():
+        field_def = await db.custom_fields.find_one({"field_id": field_id}, {"_id": 0})
+        if field_def:
+            old_value = old_custom_fields.get(field_id)
+            
+            await create_audit_log(
+                entity_type="student",
+                entity_id=student_id,
+                action="update",
+                field_changed=field_def["field_name"],
+                old_value=old_value,
+                new_value=new_value,
+                performed_by=current_user,
+                request=request
+            )
+    
+    await db.students.update_one(
+        {"student_id": student_id},
+        {"$set": {"custom_fields": changes, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    return {"message": "Campos actualizados"}
+
+# ============== CHANGE REQUEST ENDPOINTS ==============
+
+@api_router.get("/change-requests")
+async def get_change_requests(request: Request, status: str = None):
+    """Get all change requests (for approval)"""
+    await require_roles(["admin", "gerente"])(request)
+    
+    query = {}
+    if status:
+        query["status"] = status
+    
+    requests = await db.change_requests.find(query, {"_id": 0}).sort("created_at", -1).to_list(1000)
+    return {"requests": requests}
+
+@api_router.post("/change-requests/{request_id}/approve")
+async def approve_change_request(request_id: str, request: Request):
+    """Approve a change request"""
+    current_user = await require_roles(["admin", "gerente"])(request)
+    
+    change_req = await db.change_requests.find_one({"request_id": request_id}, {"_id": 0})
+    if not change_req:
+        raise HTTPException(status_code=404, detail="Solicitud no encontrada")
+    
+    if change_req["status"] != "pending":
+        raise HTTPException(status_code=400, detail="La solicitud ya fue procesada")
+    
+    now = datetime.now(timezone.utc)
+    
+    # Apply the change
+    student = await db.students.find_one({"student_id": change_req["student_id"]}, {"_id": 0})
+    if student:
+        custom_fields = student.get("custom_fields", {})
+        custom_fields[change_req["field_id"]] = change_req["new_value"]
+        
+        await db.students.update_one(
+            {"student_id": change_req["student_id"]},
+            {"$set": {"custom_fields": custom_fields, "updated_at": now.isoformat()}}
+        )
+    
+    # Update request status
+    await db.change_requests.update_one(
+        {"request_id": request_id},
+        {"$set": {
+            "status": "approved",
+            "approved_by_id": current_user["user_id"],
+            "approved_by_name": current_user["name"],
+            "resolved_at": now.isoformat()
+        }}
+    )
+    
+    # Create audit log
+    await create_audit_log(
+        entity_type="student",
+        entity_id=change_req["student_id"],
+        action="update",
+        field_changed=change_req["field_name"],
+        old_value=change_req["old_value"],
+        new_value=change_req["new_value"],
+        performed_by={
+            "user_id": change_req["requested_by_id"],
+            "name": change_req["requested_by_name"],
+            "role": "supervisor"
+        },
+        authorized_by=current_user,
+        request=request
+    )
+    
+    return {"message": "Cambio aprobado y aplicado"}
+
+@api_router.post("/change-requests/{request_id}/reject")
+async def reject_change_request(request_id: str, request: Request):
+    """Reject a change request"""
+    current_user = await require_roles(["admin", "gerente"])(request)
+    body = await request.json()
+    
+    change_req = await db.change_requests.find_one({"request_id": request_id}, {"_id": 0})
+    if not change_req:
+        raise HTTPException(status_code=404, detail="Solicitud no encontrada")
+    
+    if change_req["status"] != "pending":
+        raise HTTPException(status_code=400, detail="La solicitud ya fue procesada")
+    
+    now = datetime.now(timezone.utc)
+    
+    await db.change_requests.update_one(
+        {"request_id": request_id},
+        {"$set": {
+            "status": "rejected",
+            "approved_by_id": current_user["user_id"],
+            "approved_by_name": current_user["name"],
+            "rejection_reason": body.get("reason", ""),
+            "resolved_at": now.isoformat()
+        }}
+    )
+    
+    return {"message": "Cambio rechazado"}
+
+# ============== AUDIT LOG ENDPOINTS ==============
+
+async def create_audit_log(
+    entity_type: str,
+    entity_id: str,
+    action: str,
+    performed_by: dict,
+    old_value: Any = None,
+    new_value: Any = None,
+    field_changed: str = None,
+    authorized_by: dict = None,
+    request: Request = None
+):
+    """Helper function to create audit log entries"""
+    log_id = f"log_{uuid.uuid4().hex[:12]}"
+    now = datetime.now(timezone.utc)
+    
+    ip_address = None
+    if request:
+        ip_address = request.client.host if request.client else None
+    
+    log_entry = {
+        "log_id": log_id,
+        "entity_type": entity_type,
+        "entity_id": entity_id,
+        "action": action,
+        "field_changed": field_changed,
+        "old_value": str(old_value) if old_value is not None else None,
+        "new_value": str(new_value) if new_value is not None else None,
+        "performed_by_id": performed_by.get("user_id"),
+        "performed_by_name": performed_by.get("name"),
+        "performed_by_role": performed_by.get("role"),
+        "authorized_by_id": authorized_by.get("user_id") if authorized_by else None,
+        "authorized_by_name": authorized_by.get("name") if authorized_by else None,
+        "timestamp": now.isoformat(),
+        "ip_address": ip_address
+    }
+    
+    await db.audit_logs.insert_one(log_entry)
+    return log_entry
+
+@api_router.get("/audit-logs")
+async def get_audit_logs(request: Request, entity_type: str = None, entity_id: str = None, limit: int = 100):
+    """Get audit logs"""
+    await require_roles(["admin", "gerente"])(request)
+    
+    query = {}
+    if entity_type:
+        query["entity_type"] = entity_type
+    if entity_id:
+        query["entity_id"] = entity_id
+    
+    logs = await db.audit_logs.find(query, {"_id": 0}).sort("timestamp", -1).limit(limit).to_list(limit)
+    return {"logs": logs}
+
+@api_router.get("/students/{student_id}/audit-logs")
+async def get_student_audit_logs(student_id: str, request: Request):
+    """Get audit logs for a specific student"""
+    await require_roles(["admin", "gerente"])(request)
+    
+    logs = await db.audit_logs.find(
+        {"entity_type": "student", "entity_id": student_id}, 
+        {"_id": 0}
+    ).sort("timestamp", -1).to_list(1000)
+    
+    return {"logs": logs}
+
+# ============== EXPORT ENDPOINTS ==============
+
+@api_router.get("/students/export/excel")
+async def export_students_excel(request: Request):
+    """Export students to Excel"""
+    await require_roles(["admin", "gerente"])(request)
+    
+    students = await db.students.find({}, {"_id": 0}).to_list(10000)
+    custom_fields = await db.custom_fields.find({}, {"_id": 0}).sort("order", 1).to_list(100)
+    
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Estudiantes"
+    
+    # Headers
+    headers = ["ID", "Nombre", "Email", "Teléfono", "Carrera", "Email Institucional", "Fecha Inscripción"]
+    for field in custom_fields:
+        headers.append(field["field_name"])
+    
+    ws.append(headers)
+    
+    # Style headers
+    for col in range(1, len(headers) + 1):
+        cell = ws.cell(row=1, column=col)
+        cell.font = cell.font.copy(bold=True)
+    
+    # Data rows
+    for student in students:
+        row = [
+            student.get("student_id", ""),
+            student.get("full_name", ""),
+            student.get("email", ""),
+            student.get("phone", ""),
+            student.get("career_name", ""),
+            student.get("institutional_email", ""),
+            student.get("created_at", "")[:10] if student.get("created_at") else ""
+        ]
+        
+        custom_values = student.get("custom_fields", {})
+        for field in custom_fields:
+            row.append(custom_values.get(field["field_id"], ""))
+        
+        ws.append(row)
+    
+    # Auto-adjust column widths
+    for column in ws.columns:
+        max_length = 0
+        column_letter = column[0].column_letter
+        for cell in column:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(str(cell.value))
+            except:
+                pass
+        adjusted_width = min(max_length + 2, 50)
+        ws.column_dimensions[column_letter].width = adjusted_width
+    
+    # Save to bytes
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+    
+    filename = f"estudiantes_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+    
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
+
+@api_router.get("/students/export/pdf")
+async def export_students_pdf(request: Request):
+    """Export students to PDF"""
+    await require_roles(["admin", "gerente"])(request)
+    
+    students = await db.students.find({}, {"_id": 0}).to_list(10000)
+    custom_fields = await db.custom_fields.find({}, {"_id": 0}).sort("order", 1).to_list(100)
+    
+    output = io.BytesIO()
+    doc = SimpleDocTemplate(output, pagesize=landscape(letter), topMargin=0.5*inch, bottomMargin=0.5*inch)
+    
+    elements = []
+    styles = getSampleStyleSheet()
+    
+    # Title
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=18,
+        spaceAfter=20,
+        alignment=1
+    )
+    elements.append(Paragraph("UCIC - Lista de Estudiantes", title_style))
+    elements.append(Paragraph(f"Generado: {datetime.now().strftime('%d/%m/%Y %H:%M')}", styles['Normal']))
+    elements.append(Spacer(1, 20))
+    
+    # Table headers
+    headers = ["Nombre", "Email", "Teléfono", "Carrera", "Email Inst."]
+    # Limit custom fields for PDF to avoid overflow
+    for field in custom_fields[:3]:
+        headers.append(field["field_name"][:15])
+    
+    # Table data
+    data = [headers]
+    for student in students:
+        row = [
+            student.get("full_name", "")[:25],
+            student.get("email", "")[:25],
+            student.get("phone", "")[:15],
+            student.get("career_name", "")[:20],
+            (student.get("institutional_email", "") or "")[:20]
+        ]
+        
+        custom_values = student.get("custom_fields", {})
+        for field in custom_fields[:3]:
+            val = str(custom_values.get(field["field_id"], ""))[:15]
+            row.append(val)
+        
+        data.append(row)
+    
+    # Create table
+    col_widths = [1.5*inch, 1.8*inch, 1.2*inch, 1.5*inch, 1.5*inch]
+    col_widths.extend([1*inch] * min(len(custom_fields), 3))
+    
+    table = Table(data, colWidths=col_widths)
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1e293b')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 9),
+        ('FONTSIZE', (0, 1), (-1, -1), 8),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+        ('TOPPADDING', (0, 0), (-1, 0), 8),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f8fafc')])
+    ]))
+    
+    elements.append(table)
+    
+    # Footer
+    elements.append(Spacer(1, 20))
+    elements.append(Paragraph(f"Total: {len(students)} estudiantes", styles['Normal']))
+    
+    doc.build(elements)
+    output.seek(0)
+    
+    filename = f"estudiantes_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+    
+    return StreamingResponse(
+        output,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
+
 # ============== LEAD ENDPOINTS ==============
 
 @api_router.post("/leads", response_model=LeadResponse)
