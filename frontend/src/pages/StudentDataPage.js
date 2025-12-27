@@ -101,15 +101,14 @@ export default function StudentDataPage() {
       
       if (canApprove) {
         const [requestsRes, logsRes] = await Promise.all([
-          axios.get(`${API_URL}/api/change-requests?status=pending`, { withCredentials: true }),
-          axios.get(`${API_URL}/api/audit-logs?limit=50`, { withCredentials: true })
+          axios.get(`${API_URL}/api/students/change-requests?status=pending`, { withCredentials: true }),
+          axios.get(`${API_URL}/api/students/audit-logs`, { withCredentials: true })
         ]);
         setChangeRequests(requestsRes.data.requests || []);
         setAuditLogs(logsRes.data.logs || []);
       }
     } catch (error) {
       console.error('Error fetching data:', error);
-      toast.error('Error al cargar datos');
     } finally {
       setLoading(false);
     }
