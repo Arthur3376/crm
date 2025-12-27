@@ -176,6 +176,31 @@ export default function StudentsPage() {
     }
   };
 
+  const handleDownloadDocument = async (documentId, filename) => {
+    try {
+      const response = await axios.get(
+        `${API_URL}/api/students/${selectedStudent.student_id}/documents/${documentId}/download`,
+        { 
+          withCredentials: true,
+          responseType: 'blob'
+        }
+      );
+      
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      
+      toast.success('Documento descargado');
+    } catch (error) {
+      toast.error('Error al descargar el documento');
+    }
+  };
+
   const handleRecordAttendance = async (e) => {
     e.preventDefault();
     if (!attendanceForm.subject) {
