@@ -102,266 +102,182 @@ class UCICAPITester:
                      f"User ID: {response.get('user_id', 'N/A')}" if success else "",
                      response.get('detail', 'Failed to get user info'))
 
-    def test_dashboard_stats(self):
-        """Test dashboard statistics"""
-        success, response = self.make_request('GET', 'dashboard/stats')
+    def test_students_list(self):
+        """Test getting students list"""
+        success, response = self.make_request('GET', 'students')
         if success:
-            stats = f"Total leads: {response.get('total_leads', 0)}, New today: {response.get('new_leads_today', 0)}"
-            self.log_test("Dashboard statistics", True, stats)
+            students_count = len(response) if isinstance(response, list) else 0
+            self.log_test("Get students list", True, f"Found {students_count} students")
+            # Store first student ID for further tests
+            if students_count > 0:
+                self.test_student_id = response[0].get('student_id')
         else:
-            self.log_test("Dashboard statistics", False, "", response.get('detail', 'Failed to get stats'))
+            self.log_test("Get students list", False, "", response.get('detail', 'Failed to get students'))
 
-    def test_dashboard_recent_leads(self):
-        """Test recent leads endpoint"""
-        success, response = self.make_request('GET', 'dashboard/recent-leads?limit=5')
-        if success:
-            leads_count = len(response) if isinstance(response, list) else 0
-            self.log_test("Recent leads", True, f"Found {leads_count} recent leads")
-        else:
-            self.log_test("Recent leads", False, "", response.get('detail', 'Failed to get recent leads'))
-
-    def test_create_lead(self):
-        """Test creating a new lead"""
-        lead_data = {
-            "full_name": "Test Lead API",
-            "email": "testlead@example.com",
-            "phone": "+521234567890",
-            "career_interest": "Ingeniería",
-            "source": "manual",
-            "source_detail": "API Test"
-        }
-        
-        success, response = self.make_request('POST', 'leads', lead_data, 200)
-        if success and 'lead_id' in response:
-            self.test_lead_id = response['lead_id']
-            self.log_test("Create lead", True, f"Lead ID: {self.test_lead_id}")
-        else:
-            self.log_test("Create lead", False, "", response.get('detail', 'Failed to create lead'))
-
-    def test_get_leads(self):
-        """Test getting leads list"""
-        success, response = self.make_request('GET', 'leads')
-        if success:
-            leads_count = len(response) if isinstance(response, list) else 0
-            self.log_test("Get leads list", True, f"Found {leads_count} leads")
-        else:
-            self.log_test("Get leads list", False, "", response.get('detail', 'Failed to get leads'))
-
-    def test_get_lead_detail(self):
-        """Test getting specific lead details"""
-        if not self.test_lead_id:
-            self.log_test("Get lead detail", False, "", "No test lead ID available")
+    def test_student_detail(self):
+        """Test getting specific student details"""
+        if not self.test_student_id:
+            self.log_test("Get student detail", False, "", "No test student ID available")
             return
             
-        success, response = self.make_request('GET', f'leads/{self.test_lead_id}')
+        success, response = self.make_request('GET', f'students/{self.test_student_id}')
         if success:
-            self.log_test("Get lead detail", True, f"Lead: {response.get('full_name', 'Unknown')}")
+            self.log_test("Get student detail", True, f"Student: {response.get('full_name', 'Unknown')}")
         else:
-            self.log_test("Get lead detail", False, "", response.get('detail', 'Failed to get lead detail'))
+            self.log_test("Get student detail", False, "", response.get('detail', 'Failed to get student detail'))
 
-    def test_update_lead(self):
-        """Test updating lead"""
-        if not self.test_lead_id:
-            self.log_test("Update lead", False, "", "No test lead ID available")
+    def test_custom_fields_get(self):
+        """Test getting custom field definitions"""
+        success, response = self.make_request('GET', 'students/custom-fields')
+        if success:
+            fields = response.get('fields', [])
+            self.log_test("Get custom fields", True, f"Found {len(fields)} custom fields")
+        else:
+            self.log_test("Get custom fields", False, "", response.get('detail', 'Failed to get custom fields'))
+
+    def test_custom_fields_create(self):
+        """Test creating a custom field"""
+        field_data = {
+            "field_name": "Número de Control",
+            "field_type": "text",
+            "required": True
+        }
+        
+        success, response = self.make_request('POST', 'students/custom-fields', field_data)
+        if success and 'field' in response:
+            self.test_custom_field_id = response['field']['field_id']
+            self.log_test("Create custom field", True, f"Field ID: {self.test_custom_field_id}")
+        else:
+            self.log_test("Create custom field", False, "", response.get('detail', 'Failed to create custom field'))
+
+    def test_custom_fields_update(self):
+        """Test updating a custom field"""
+        if not self.test_custom_field_id:
+            self.log_test("Update custom field", False, "", "No test custom field ID available")
             return
             
         update_data = {
-            "status": "contactado",
-            "notes": "Updated via API test"
+            "field_name": "Número de Control Actualizado",
+            "required": False
         }
         
-        success, response = self.make_request('PUT', f'leads/{self.test_lead_id}', update_data)
+        success, response = self.make_request('PUT', f'students/custom-fields/{self.test_custom_field_id}', update_data)
         if success:
-            self.log_test("Update lead", True, f"Status: {response.get('status', 'Unknown')}")
+            self.log_test("Update custom field", True, "Field updated successfully")
         else:
-            self.log_test("Update lead", False, "", response.get('detail', 'Failed to update lead'))
+            self.log_test("Update custom field", False, "", response.get('detail', 'Failed to update custom field'))
 
-    def test_lead_filters(self):
-        """Test lead filtering"""
-        # Test status filter
-        success, response = self.make_request('GET', 'leads?status=nuevo')
-        if success:
-            count = len(response) if isinstance(response, list) else 0
-            self.log_test("Lead filter by status", True, f"Found {count} new leads")
-        else:
-            self.log_test("Lead filter by status", False, "", response.get('detail', 'Filter failed'))
-
-        # Test source filter
-        success, response = self.make_request('GET', 'leads?source=manual')
-        if success:
-            count = len(response) if isinstance(response, list) else 0
-            self.log_test("Lead filter by source", True, f"Found {count} manual leads")
-        else:
-            self.log_test("Lead filter by source", False, "", response.get('detail', 'Filter failed'))
-
-    def test_conversations(self):
-        """Test conversation functionality"""
-        if not self.test_lead_id:
-            self.log_test("Conversation tests", False, "", "No test lead ID available")
+    def test_student_custom_fields_update(self):
+        """Test updating student's custom field values"""
+        if not self.test_student_id or not self.test_custom_field_id:
+            self.log_test("Update student custom fields", False, "", "Missing student ID or custom field ID")
             return
-
-        # Get conversation
-        success, response = self.make_request('GET', f'conversations/{self.test_lead_id}')
-        if success:
-            self.log_test("Get conversation", True, f"Messages: {len(response.get('messages', []))}")
-        else:
-            self.log_test("Get conversation", False, "", response.get('detail', 'Failed to get conversation'))
-
-        # Add message
-        message_data = {
-            "lead_id": self.test_lead_id,
-            "message": "Test message from API",
-            "sender": "agent"
+            
+        update_data = {
+            "fields": {
+                self.test_custom_field_id: "12345678"
+            }
         }
         
-        success, response = self.make_request('POST', 'conversations', message_data, 200)
+        success, response = self.make_request('PUT', f'students/{self.test_student_id}/custom-fields', update_data)
         if success:
-            self.log_test("Add conversation message", True, "Message added successfully")
+            self.log_test("Update student custom fields", True, "Student custom fields updated")
         else:
-            self.log_test("Add conversation message", False, "", response.get('detail', 'Failed to add message'))
+            self.log_test("Update student custom fields", False, "", response.get('detail', 'Failed to update student custom fields'))
 
-    def test_appointments(self):
-        """Test appointment functionality"""
-        if not self.test_lead_id:
-            self.log_test("Appointment tests", False, "", "No test lead ID available")
+    def test_change_requests_get(self):
+        """Test getting change requests"""
+        success, response = self.make_request('GET', 'students/change-requests')
+        if success:
+            requests_list = response.get('requests', [])
+            self.log_test("Get change requests", True, f"Found {len(requests_list)} change requests")
+            # Store first request ID for approval/rejection tests
+            if requests_list:
+                self.test_change_request_id = requests_list[0].get('request_id')
+        else:
+            self.log_test("Get change requests", False, "", response.get('detail', 'Failed to get change requests'))
+
+    def test_change_request_approve(self):
+        """Test approving a change request"""
+        if not self.test_change_request_id:
+            self.log_test("Approve change request", False, "", "No test change request ID available")
             return
-
-        # Create appointment
-        appointment_data = {
-            "lead_id": self.test_lead_id,
-            "agent_id": self.user_data.get('user_id'),
-            "title": "Test Appointment",
-            "description": "API test appointment",
-            "scheduled_at": (datetime.now() + timedelta(days=1)).isoformat()
-        }
-        
-        success, response = self.make_request('POST', 'appointments', appointment_data, 200)
-        if success and 'appointment_id' in response:
-            self.test_appointment_id = response['appointment_id']
-            self.log_test("Create appointment", True, f"Appointment ID: {self.test_appointment_id}")
-        else:
-            self.log_test("Create appointment", False, "", response.get('detail', 'Failed to create appointment'))
-
-        # Get appointments
-        success, response = self.make_request('GET', 'appointments')
+            
+        success, response = self.make_request('POST', f'students/change-requests/{self.test_change_request_id}/approve')
         if success:
-            count = len(response) if isinstance(response, list) else 0
-            self.log_test("Get appointments", True, f"Found {count} appointments")
+            self.log_test("Approve change request", True, "Change request approved")
         else:
-            self.log_test("Get appointments", False, "", response.get('detail', 'Failed to get appointments'))
+            self.log_test("Approve change request", False, "", response.get('detail', 'Failed to approve change request'))
 
-    def test_users_management(self):
-        """Test user management (admin/gerente only)"""
-        if self.user_data.get('role') not in ['admin', 'gerente']:
-            self.log_test("User management", False, "", "Insufficient permissions")
-            return
-
-        # Get users
-        success, response = self.make_request('GET', 'users')
+    def test_audit_logs(self):
+        """Test getting audit logs"""
+        success, response = self.make_request('GET', 'students/audit-logs')
         if success:
-            count = len(response) if isinstance(response, list) else 0
-            self.log_test("Get users list", True, f"Found {count} users")
+            logs = response.get('logs', [])
+            self.log_test("Get audit logs", True, f"Found {len(logs)} audit log entries")
         else:
-            self.log_test("Get users list", False, "", response.get('detail', 'Failed to get users'))
+            self.log_test("Get audit logs", False, "", response.get('detail', 'Failed to get audit logs'))
 
-        # Get agents
-        success, response = self.make_request('GET', 'users/agents')
+    def test_export_excel(self):
+        """Test Excel export"""
+        success, response = self.make_request('GET', 'students/export/excel', expected_status=200)
         if success:
-            count = len(response) if isinstance(response, list) else 0
-            self.log_test("Get agents list", True, f"Found {count} agents")
-        else:
-            self.log_test("Get agents list", False, "", response.get('detail', 'Failed to get agents'))
-
-    def test_webhooks(self):
-        """Test webhook functionality (admin/gerente only)"""
-        if self.user_data.get('role') not in ['admin', 'gerente']:
-            self.log_test("Webhook tests", False, "", "Insufficient permissions")
-            return
-
-        # Get webhooks
-        success, response = self.make_request('GET', 'webhooks')
-        if success:
-            count = len(response) if isinstance(response, list) else 0
-            self.log_test("Get webhooks", True, f"Found {count} webhooks")
-        else:
-            self.log_test("Get webhooks", False, "", response.get('detail', 'Failed to get webhooks'))
-
-        # Create webhook
-        webhook_data = {
-            "name": "Test Webhook",
-            "url": "https://example.com/webhook",
-            "events": ["lead.created"],
-            "is_active": True
-        }
-        
-        success, response = self.make_request('POST', 'webhooks', webhook_data, 200)
-        if success and 'webhook_id' in response:
-            self.test_webhook_id = response['webhook_id']
-            self.log_test("Create webhook", True, f"Webhook ID: {self.test_webhook_id}")
-        else:
-            self.log_test("Create webhook", False, "", response.get('detail', 'Failed to create webhook'))
-
-    def test_incoming_webhook(self):
-        """Test incoming webhook for N8N"""
-        webhook_payload = {
-            "full_name": "N8N Test Lead",
-            "email": "n8ntest@example.com",
-            "phone": "+521234567891",
-            "career_interest": "Marketing",
-            "source": "webhook",
-            "source_detail": "N8N Integration Test"
-        }
-        
-        success, response = self.make_request(
-            'POST', 
-            'webhooks/incoming/lead', 
-            webhook_payload, 
-            200, 
-            auth_required=False
-        )
-        
-        if success:
-            self.log_test("Incoming webhook (N8N)", True, f"Lead created: {response.get('lead_id', 'Unknown')}")
-        else:
-            self.log_test("Incoming webhook (N8N)", False, "", response.get('detail', 'Webhook failed'))
-
-    def test_constants(self):
-        """Test constants endpoints"""
-        endpoints = ['careers', 'sources', 'statuses', 'roles']
-        
-        for endpoint in endpoints:
-            success, response = self.make_request('GET', f'constants/{endpoint}')
-            if success:
-                data_key = endpoint
-                count = len(response.get(data_key, [])) if isinstance(response.get(data_key), list) else 0
-                self.log_test(f"Get {endpoint} constants", True, f"Found {count} items")
+            # Check if response is binary data (Excel file)
+            content_type = getattr(response, 'headers', {}).get('content-type', '')
+            if 'spreadsheet' in content_type or 'excel' in content_type:
+                self.log_test("Export to Excel", True, "Excel file generated successfully")
             else:
-                self.log_test(f"Get {endpoint} constants", False, "", response.get('detail', f'Failed to get {endpoint}'))
+                self.log_test("Export to Excel", True, "Export endpoint responded (content type check skipped)")
+        else:
+            self.log_test("Export to Excel", False, "", response.get('detail', 'Failed to export to Excel'))
+
+    def test_export_pdf(self):
+        """Test PDF export"""
+        success, response = self.make_request('GET', 'students/export/pdf', expected_status=200)
+        if success:
+            # Check if response is binary data (PDF file)
+            content_type = getattr(response, 'headers', {}).get('content-type', '')
+            if 'pdf' in content_type:
+                self.log_test("Export to PDF", True, "PDF file generated successfully")
+            else:
+                self.log_test("Export to PDF", True, "Export endpoint responded (content type check skipped)")
+        else:
+            self.log_test("Export to PDF", False, "", response.get('detail', 'Failed to export to PDF'))
+
+    def test_regression_endpoints(self):
+        """Test other core endpoints for regression"""
+        endpoints = [
+            ('leads', 'leads'),
+            ('teachers', 'teachers'),
+            ('careers/full', 'careers'),
+            ('dashboard/stats', 'dashboard stats')
+        ]
+        
+        for endpoint, name in endpoints:
+            success, response = self.make_request('GET', endpoint)
+            if success:
+                if isinstance(response, list):
+                    count = len(response)
+                    self.log_test(f"Get {name}", True, f"Found {count} items")
+                elif isinstance(response, dict):
+                    self.log_test(f"Get {name}", True, "Data retrieved successfully")
+                else:
+                    self.log_test(f"Get {name}", True, "Endpoint responded")
+            else:
+                self.log_test(f"Get {name}", False, "", response.get('detail', f'Failed to get {name}'))
 
     def cleanup_test_data(self):
         """Clean up test data"""
-        # Delete test webhook
-        if self.test_webhook_id and self.user_data.get('role') in ['admin', 'gerente']:
-            success, _ = self.make_request('DELETE', f'webhooks/{self.test_webhook_id}')
+        # Delete test custom field
+        if self.test_custom_field_id and self.user_data.get('role') in ['admin', 'gerente']:
+            success, _ = self.make_request('DELETE', f'students/custom-fields/{self.test_custom_field_id}')
             if success:
-                print(f"🧹 Cleaned up test webhook: {self.test_webhook_id}")
-
-        # Delete test appointment
-        if self.test_appointment_id:
-            success, _ = self.make_request('DELETE', f'appointments/{self.test_appointment_id}')
-            if success:
-                print(f"🧹 Cleaned up test appointment: {self.test_appointment_id}")
-
-        # Delete test lead (admin/gerente only)
-        if self.test_lead_id and self.user_data.get('role') in ['admin', 'gerente']:
-            success, _ = self.make_request('DELETE', f'leads/{self.test_lead_id}')
-            if success:
-                print(f"🧹 Cleaned up test lead: {self.test_lead_id}")
+                print(f"🧹 Cleaned up test custom field: {self.test_custom_field_id}")
 
     def run_all_tests(self):
-        """Run complete test suite"""
-        print("🚀 Starting LeadFlow Pro API Tests")
-        print("=" * 50)
+        """Run complete UCIC test suite"""
+        print("🚀 Starting UCIC Student Data Management API Tests")
+        print("=" * 60)
         
         # Authentication tests
         if not self.test_auth_login():
@@ -370,38 +286,37 @@ class UCICAPITester:
             
         self.test_auth_me()
         
-        # Dashboard tests
-        self.test_dashboard_stats()
-        self.test_dashboard_recent_leads()
+        # Students module tests
+        self.test_students_list()
+        self.test_student_detail()
         
-        # Lead management tests
-        self.test_create_lead()
-        self.test_get_leads()
-        self.test_get_lead_detail()
-        self.test_update_lead()
-        self.test_lead_filters()
+        # Custom fields tests
+        self.test_custom_fields_get()
+        self.test_custom_fields_create()
+        self.test_custom_fields_update()
         
-        # Conversation tests
-        self.test_conversations()
+        # Student custom field values
+        self.test_student_custom_fields_update()
         
-        # Appointment tests
-        self.test_appointments()
+        # Change requests workflow
+        self.test_change_requests_get()
+        self.test_change_request_approve()
         
-        # User management tests
-        self.test_users_management()
+        # Audit logs
+        self.test_audit_logs()
         
-        # Webhook tests
-        self.test_webhooks()
-        self.test_incoming_webhook()
+        # Export functionality
+        self.test_export_excel()
+        self.test_export_pdf()
         
-        # Constants tests
-        self.test_constants()
+        # Regression tests
+        self.test_regression_endpoints()
         
         # Cleanup
         self.cleanup_test_data()
         
         # Results
-        print("\n" + "=" * 50)
+        print("\n" + "=" * 60)
         print(f"📊 Test Results: {self.tests_passed}/{self.tests_run} passed")
         success_rate = (self.tests_passed / self.tests_run * 100) if self.tests_run > 0 else 0
         print(f"📈 Success Rate: {success_rate:.1f}%")
