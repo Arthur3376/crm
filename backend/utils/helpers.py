@@ -95,11 +95,16 @@ async def send_notification(event: str, data: dict, agent_data: Optional[dict] =
                 if agent_data:
                     payload["assigned_agent"] = agent_data
                 
+                logger.info(f"Sending webhook to: {webhook_url}")
                 async with httpx.AsyncClient() as client:
-                    response = await client.post(webhook_url, json=payload, timeout=10.0)
-                    logger.info(f"Webhook notification sent: {response.status_code}")
+                    response = await client.post(webhook_url, json=payload, timeout=5.0)
+                    logger.info(f"Webhook notification sent: {response.status_code} - {response.text[:100] if response.text else 'No response body'}")
+            except httpx.TimeoutException:
+                logger.error(f"Webhook timeout - server not responding: {webhook_url}")
+            except httpx.ConnectError as e:
+                logger.error(f"Webhook connection error: {webhook_url} - {str(e)}")
             except Exception as e:
-                logger.error(f"Failed to send webhook notification: {e}")
+                logger.error(f"Failed to send webhook notification: {type(e).__name__} - {str(e)}")
         
         # Send WhatsApp notification if configured
         notification_phone = settings.get("notification_phone")
