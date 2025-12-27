@@ -622,3 +622,84 @@ async def record_attendance(student_id: str, request: Request):
     return {"message": "Asistencia registrada"}
 
 
+@router.put("/{student_id}/custom-fields")
+async def update_student_custom_fields(student_id: str, request: Request):
+    """Update custom field values for a student"""
+    current_user = await get_current_user(request)
+    body = await request.json()
+    
+    student = await db.students.find_one({"student_id": student_id}, {"_id": 0})
+    if not student:
+        raise HTTPException(status_code=404, detail="Estudiante no encontrado")
+    
+    # Check permissions
+    user_role = current_user["role"]
+    
+    # Students can only view
+    if user_role == "alumno":
+        raise HTTPException(status_code=403, detail="Los alumnos no pueden modificar datos")
+    
+    # Supervisors need approval for changes
+    if user_role == "supervisor":
+        changes = body.get("fields", {})
+        old_custom_fields = student.get("custom_fields", {})
+        
+        for field_id, new_value in changes.items():
+            field_def = await db.custom_fields.find_one({"field_id": field_id}, {"_id": 0})
+            if not field_def:
+                continue
+                
+            if not field_def.get("editable_by_supervisor", True):
+                continue
+            
+            old_value = old_custom_fields.get(field_id)
+            if old_value != new_value:
+                request_id = f"req_{uuid.uuid4().hex[:8]}"
+                now = datetime.now(timezone.utc)
+                
+                change_request = {
+                    "request_id": request_id,
+                    "student_id": student_id,
+                    "student_name": student["full_name"],
+                    "field_id": field_id,
+                    "field_name": field_def["field_name"],
+                    "old_value": old_value,
+                    "new_value": new_value,
+                    "requested_by_id": current_user["user_id"],
+                    "requested_by_name": current_user["name"],
+                    "status": "pending",
+                    "created_at": now.isoformat()
+                }
+                
+                await db.change_requests.insert_one(change_request)
+        
+        return {"message": "Solicitud de cambio enviada para aprobación", "requires_approval": True}
+    
+    # Admin/Gerente can update directly
+    changes = body.get("fields", {})
+    old_custom_fields = student.get("custom_fields", {})
+    
+    for field_id, new_value in changes.items():
+        field_def = await db.custom_fields.find_one({"field_id": field_id}, {"_id": 0})
+        if field_def:
+            old_value = old_custom_fields.get(field_id)
+            
+            await create_audit_log(
+                entity_type="student",
+                entity_id=student_id,
+                action="update",
+                field_changed=field_def["field_name"],
+                old_value=old_value,
+                new_value=new_value,
+                performed_by=current_user,
+                request=request
+            )
+    
+    await db.students.update_one(
+        {"student_id": student_id},
+        {"$set": {"custom_fields": changes, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    return {"message": "Campos actualizados"}
+
+
