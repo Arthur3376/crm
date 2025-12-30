@@ -3,132 +3,181 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SISTEMA INTEGRAL UCIC - 2026</title>
+    <title>UCIC | Sistema de Gestión Integral</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root { --ucic-orange: #ea580c; --ucic-dark: #111827; }
-        body { font-family: 'Inter', sans-serif; background: #f3f4f6; overflow: hidden; }
-        .sidebar-item { transition: all 0.3s; cursor: pointer; border-radius: 0.75rem; color: #6b7280; }
-        .sidebar-item:hover { background: rgba(234, 88, 12, 0.1); color: var(--ucic-orange); }
-        .active-nav { background: var(--ucic-orange) !important; color: white !important; }
-        .view-content { animation: fadeIn 0.3s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f8fafc; }
+        .glass-card { background: rgba(255, 255, 255, 0.9); border: 1px solid #e2e8f0; backdrop-filter: blur(10px); }
+        .sidebar-link { transition: all 0.2s; border-radius: 12px; margin-bottom: 4px; }
+        .sidebar-link.active { background: #ea580c; color: white; box-shadow: 0 10px 15px -3px rgba(234, 88, 12, 0.3); }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
 </head>
-<body class="flex h-screen">
+<body class="flex h-screen overflow-hidden text-slate-800">
 
-    <div id="login-screen" class="fixed inset-0 z-[200] bg-gray-900 flex items-center justify-center p-4">
-        <div class="bg-white p-8 rounded-[2.5rem] w-full max-w-md text-center shadow-2xl">
-            <h2 class="text-2xl font-black uppercase mb-2">Acceso Institucional</h2>
-            <p class="text-gray-400 text-sm mb-6">Ingresa con tu cuenta @ucic.edu.mx</p>
-            <input type="email" id="auth-email" placeholder="usuario@ucic.edu.mx" class="w-full p-4 bg-gray-100 rounded-2xl mb-4 outline-none focus:ring-2 focus:ring-orange-500 text-center font-bold">
-            <button onclick="handleLogin()" class="w-full bg-orange-600 text-white font-bold py-4 rounded-2xl shadow-lg hover:bg-orange-700 transition">Entrar al Sistema</button>
+    <div id="login-screen" class="fixed inset-0 z-[500] bg-slate-900 flex items-center justify-center p-6">
+        <div class="bg-white p-10 rounded-[3rem] w-full max-w-md shadow-2xl border border-slate-700">
+            <div class="w-20 h-20 bg-orange-100 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                <i class="fa-solid fa-shield-halved text-orange-600 text-3xl"></i>
+            </div>
+            <h2 class="text-3xl font-extrabold text-center mb-2">Bienvenido</h2>
+            <p class="text-slate-400 text-center text-sm mb-8">Ingresa tus credenciales corporativas</p>
+            <input type="email" id="auth-email" placeholder="usuario@ucic.edu.mx" class="w-full p-4 bg-slate-50 rounded-2xl mb-4 border border-slate-200 outline-none focus:border-orange-500 transition-all font-semibold">
+            <button onclick="handleLogin()" class="w-full bg-orange-600 text-white font-bold py-4 rounded-2xl hover:bg-orange-700 shadow-lg shadow-orange-200 transition-all">Acceder al Sistema</button>
         </div>
     </div>
 
-    <nav class="w-64 bg-white border-r border-gray-200 flex flex-col p-4 z-50">
-        <div class="mb-10 px-4">
-            <h1 class="text-xl font-black text-gray-900 uppercase">UCIC <span class="text-orange-600">CORE</span></h1>
-            <p id="user-role-display" class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Panel Administrativo</p>
+    <aside class="w-72 bg-white border-r border-slate-200 flex flex-col p-6 space-y-8">
+        <div>
+            <h1 class="text-2xl font-extrabold tracking-tighter italic">UCIC<span class="text-orange-600">.EDU</span></h1>
+            <p class="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">Enterprise Resource Planning</p>
         </div>
 
-        <div class="space-y-2 flex-1">
-            <div onclick="switchView('dashboard')" id="nav-dashboard" class="sidebar-item p-4 flex items-center gap-3 font-bold text-sm active-nav"><i class="fa-solid fa-chart-line"></i> Dashboard</div>
-            <div onclick="switchView('leads')" id="nav-leads" class="sidebar-item p-4 flex items-center gap-3 font-bold text-sm"><i class="fa-solid fa-users-rectangle"></i> Prospectos / Leads</div>
-            <div onclick="switchView('academico')" id="nav-academico" class="sidebar-item p-4 flex items-center gap-3 font-bold text-sm"><i class="fa-solid fa-graduation-cap"></i> Control Académico</div>
-            <div onclick="switchView('multimedia')" id="nav-multimedia" class="sidebar-item p-4 flex items-center gap-3 font-bold text-sm"><i class="fa-solid fa-video"></i> Videoteca Teams</div>
-        </div>
-
-        <button onclick="location.reload()" class="p-4 text-red-500 font-bold text-sm flex items-center gap-3 hover:bg-red-50 rounded-xl mt-auto"><i class="fa-solid fa-right-from-bracket"></i> Salir</button>
-    </nav>
-
-    <main class="flex-1 flex flex-col overflow-hidden">
-        <header class="h-20 bg-white border-b border-gray-200 flex items-center justify-between px-8">
-            <div class="flex items-center gap-4">
-                <input type="text" placeholder="Buscar..." class="bg-gray-100 px-6 py-2 rounded-full text-sm w-80 outline-none">
+        <nav class="flex-1">
+            <p class="text-[10px] font-extrabold text-slate-400 uppercase mb-4 px-4">Menu Principal</p>
+            <div onclick="switchView('dashboard')" id="nav-dashboard" class="sidebar-link active p-4 flex items-center gap-3 cursor-pointer font-semibold text-sm">
+                <i class="fa-solid fa-grid-2"></i> Dashboard Global
             </div>
-            <div class="flex items-center gap-4">
-                <div class="text-right">
-                    <p id="profile-name" class="text-sm font-bold">Usuario</p>
-                    <p class="text-[10px] text-orange-600 font-black">NIVEL ACCESO: TOTAL</p>
+            <div onclick="switchView('leads')" id="nav-leads" class="sidebar-link p-4 flex items-center gap-3 cursor-pointer font-semibold text-sm hover:bg-slate-50">
+                <i class="fa-solid fa-bolt"></i> Pipeline de Leads
+            </div>
+            <div onclick="switchView('academico')" id="nav-academico" class="sidebar-link p-4 flex items-center gap-3 cursor-pointer font-semibold text-sm hover:bg-slate-50">
+                <i class="fa-solid fa-graduation-cap"></i> Control Académico
+            </div>
+            <div onclick="switchView('multimedia')" id="nav-multimedia" class="sidebar-link p-4 flex items-center gap-3 cursor-pointer font-semibold text-sm hover:bg-slate-50">
+                <i class="fa-solid fa-video"></i> Repositorio Teams
+            </div>
+        </nav>
+
+        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-8 h-8 rounded-full bg-orange-500 text-white flex items-center justify-center text-xs font-bold">AD</div>
+                <div>
+                    <p class="text-xs font-bold" id="profile-name">Administrador</p>
+                    <p class="text-[9px] text-slate-400">Servidor Local v1.0</p>
                 </div>
-                <div class="w-10 h-10 rounded-full bg-orange-100 border border-orange-500 flex items-center justify-center font-bold text-orange-600">UC</div>
+            </div>
+            <button onclick="location.reload()" class="w-full text-left text-[10px] font-bold text-red-500 hover:text-red-700"><i class="fa-solid fa-power-off mr-1"></i> CERRAR SESIÓN</button>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col">
+        <header class="h-20 bg-white/50 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-10">
+            <h2 id="view-title" class="text-xl font-extrabold uppercase tracking-tight">Dashboard Global</h2>
+            <div class="flex items-center gap-6">
+                <div class="flex gap-2">
+                    <span class="px-3 py-1 bg-green-100 text-green-600 rounded-full text-[10px] font-black underline">SISTEMA ONLINE</span>
+                    <span id="db-status" class="px-3 py-1 bg-orange-100 text-orange-600 rounded-full text-[10px] font-black">LOCAL DB: CONNECTED</span>
+                </div>
             </div>
         </header>
 
-        <section id="viewport" class="p-8 overflow-y-auto h-full">
+        <section id="viewport" class="p-10 overflow-y-auto">
             
             <div id="view-dashboard" class="view-content">
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-                        <p class="text-gray-400 text-[10px] font-black uppercase">Leads n8n</p>
-                        <h3 class="text-3xl font-black">1,284</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                    <div class="glass-card p-8 rounded-[2rem] shadow-xl shadow-slate-200/50">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="p-3 bg-orange-50 rounded-2xl text-orange-600"><i class="fa-solid fa-user-group text-xl"></i></div>
+                            <span class="text-xs font-bold text-green-500">+14%</span>
+                        </div>
+                        <p class="text-slate-400 text-xs font-bold uppercase">Total Leads Semanales</p>
+                        <h3 class="text-4xl font-black mt-1">284</h3>
                     </div>
-                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-                        <p class="text-gray-400 text-[10px] font-black uppercase">Alumnos Inscritos</p>
-                        <h3 class="text-3xl font-black text-orange-600">452</h3>
+                    <div class="glass-card p-8 rounded-[2rem] shadow-xl shadow-slate-200/50">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="p-3 bg-blue-50 rounded-2xl text-blue-600"><i class="fa-solid fa-graduation-cap text-xl"></i></div>
+                            <span class="text-xs font-bold text-blue-500">Meta: 500</span>
+                        </div>
+                        <p class="text-slate-400 text-xs font-bold uppercase">Alumnos Inscritos</p>
+                        <h3 class="text-4xl font-black mt-1 text-slate-900">452</h3>
                     </div>
-                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-                        <p class="text-gray-400 text-[10px] font-black uppercase">Tasa Conversión</p>
-                        <h3 class="text-3xl font-black">35.2%</h3>
-                    </div>
-                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-                        <p class="text-gray-400 text-[10px] font-black uppercase">Clases Grabadas</p>
-                        <h3 class="text-3xl font-black text-blue-600">142</h3>
+                    <div class="glass-card p-8 rounded-[2rem] shadow-xl shadow-slate-200/50 border-orange-200 bg-orange-50/30">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="p-3 bg-white rounded-2xl text-slate-900 shadow-sm"><i class="fa-solid fa-wallet text-xl"></i></div>
+                        </div>
+                        <p class="text-slate-400 text-xs font-bold uppercase italic text-orange-800">Proyección Mensual</p>
+                        <h3 class="text-4xl font-black mt-1">$4.2M</h3>
                     </div>
                 </div>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div class="bg-white p-8 rounded-[2rem] shadow-sm italic"><canvas id="chartVentas"></canvas></div>
-                    <div class="bg-white p-8 rounded-[2rem] shadow-sm italic"><canvas id="chartAcademia"></canvas></div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                    <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
+                        <h4 class="font-extrabold mb-8 flex items-center gap-2"><i class="fa-solid fa-chart-simple text-orange-600"></i> Rendimiento por Carrera</h4>
+                        <canvas id="chartVentas" height="250"></canvas>
+                    </div>
+                    <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 text-center">
+                        <h4 class="font-extrabold mb-8 text-left">Distribución Académica</h4>
+                        <div class="w-64 mx-auto"><canvas id="chartAcademia"></canvas></div>
+                    </div>
                 </div>
             </div>
 
             <div id="view-leads" class="view-content hidden">
-                <h2 class="text-2xl font-black uppercase mb-6">Pipeline de Ventas</h2>
-                <div class="bg-white rounded-3xl shadow-sm overflow-hidden">
-                    <table class="w-full text-left">
-                        <thead class="bg-gray-50 border-b text-[10px] uppercase font-black text-gray-400">
-                            <tr><th class="p-4">Prospecto</th><th class="p-4">Carrera Interés</th><th class="p-4">Status</th><th class="p-4">Acción</th></tr>
-                        </thead>
-                        <tbody id="leads-body"></tbody>
-                    </table>
+                <div class="flex justify-between items-end mb-8">
+                    <div>
+                        <h2 class="text-3xl font-black">Pipeline de Ventas</h2>
+                        <p class="text-slate-400 text-sm">Monitoreo de leads captados vía n8n</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="px-6 py-3 bg-slate-900 text-white rounded-2xl font-bold text-xs uppercase">Exportar Reporte</button>
+                    </div>
                 </div>
+                <div class="grid grid-cols-1 gap-4" id="leads-container">
+                    </div>
             </div>
 
             <div id="view-academico" class="view-content hidden">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100">
-                        <h3 class="text-lg font-black mb-4 uppercase text-orange-600">Nueva Inscripción</h3>
-                        <form class="space-y-4">
-                            <input type="text" id="ins-nombre" placeholder="Nombre completo" class="w-full p-4 bg-gray-50 rounded-xl outline-none">
-                            <select id="ins-carrera" class="w-full p-4 bg-gray-50 rounded-xl outline-none"></select>
-                            <input type="text" id="ins-matricula" placeholder="Matrícula" class="w-full p-4 bg-gray-50 rounded-xl outline-none">
-                            <button type="button" onclick="inscribirAlumno()" class="w-full bg-gray-900 text-white font-bold py-4 rounded-2xl hover:bg-orange-600 transition">Inscribir Alumno</button>
-                        </form>
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                    <div class="lg:col-span-1 space-y-6">
+                        <div class="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm">
+                            <h3 class="font-black text-lg mb-6 text-orange-600 uppercase italic">Registro Oficial</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="text-[10px] font-black text-slate-400 uppercase ml-2">Alumno</label>
+                                    <input id="ins-nombre" type="text" class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none focus:ring-2 focus:ring-orange-500 font-bold">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-black text-slate-400 uppercase ml-2">Carrera</label>
+                                    <select id="ins-carrera" class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none font-bold text-sm"></select>
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-black text-slate-400 uppercase ml-2">Matrícula</label>
+                                    <input id="ins-matricula" type="text" class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none font-mono">
+                                </div>
+                                <button onclick="inscribirAlumno()" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black uppercase text-xs tracking-widest mt-4">Inscribir en DB</button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="lg:col-span-2 space-y-6">
-                        <div class="bg-white p-6 rounded-[2rem] shadow-sm">
-                            <h3 class="font-black uppercase mb-4 text-gray-400">Listado de Alumnos</h3>
-                            <table class="w-full text-sm">
-                                <tbody id="tabla-alumnos-activos"></tbody>
+                    <div class="lg:col-span-3">
+                        <div class="bg-white rounded-[2.5rem] border border-slate-200 overflow-hidden shadow-sm">
+                            <table class="w-full text-left">
+                                <thead class="bg-slate-50 border-b border-slate-100 text-[10px] font-black text-slate-400 uppercase">
+                                    <tr>
+                                        <th class="p-6">Expediente</th>
+                                        <th class="p-6">Programa Académico</th>
+                                        <th class="p-6">Estatus de Pago</th>
+                                        <th class="p-6">Kardex</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-alumnos-activos" class="divide-y divide-slate-50">
+                                    </tbody>
                             </table>
                         </div>
-                        <div id="panel-horarios" class="bg-orange-50 p-6 rounded-[2rem] border border-orange-200 hidden">
-                            <h4 class="font-black text-orange-800 uppercase mb-4 italic">Asignar Materias: <span id="nombre-alumno-horario"></span></h4>
-                            <div id="lista-materias-disponibles" class="grid grid-cols-2 gap-3"></div>
+                        
+                        <div id="panel-horarios" class="mt-8 bg-orange-600 rounded-[2.5rem] p-10 text-white hidden relative overflow-hidden">
+                            <div class="relative z-10">
+                                <h4 class="text-2xl font-black mb-2 italic">Configuración de Horario</h4>
+                                <p class="text-orange-200 text-sm mb-8" id="nombre-alumno-horario"></p>
+                                <div id="lista-materias-disponibles" class="grid grid-cols-2 md:grid-cols-3 gap-4"></div>
+                            </div>
+                            <i class="fa-solid fa-graduation-cap absolute -right-10 -bottom-10 text-[15rem] opacity-10"></i>
                         </div>
                     </div>
-                </div>
-            </div>
-
-            <div id="view-multimedia" class="view-content hidden">
-                <h2 class="text-2xl font-black uppercase mb-6 text-gray-800 italic">Videoteca Institucional (Teams)</h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="bg-black aspect-video rounded-3xl flex items-center justify-center text-white font-black italic">CLASE_DERECHO_2026.MP4</div>
-                    <div class="bg-black aspect-video rounded-3xl flex items-center justify-center text-white font-black italic">CINE_ILUMINACION.MP4</div>
-                    <div class="bg-black aspect-video rounded-3xl flex items-center justify-center text-white font-black italic">SOFT_BASES_DATOS.MP4</div>
                 </div>
             </div>
 
@@ -136,63 +185,74 @@
     </main>
 
     <script>
-        // CONFIGURACIÓN GLOBAL
         const CARRERAS = {
-            "Cinematografía": ["Guionismo I", "Dirección de Fotografía", "Historia del Cine", "Edición Digital"],
-            "Diseño Automotriz": ["Aerodinámica", "Modelado 3D", "Ingeniería de Materiales", "Motores"],
-            "Derecho": ["Derecho Romano", "Derecho Civil", "Teoría del Estado", "Derecho Constitucional"],
-            "Software": ["Bases de Datos", "Algoritmos", "Fullstack JS", "Ciberseguridad"],
-            "Administración": ["Contabilidad", "Macroeconomía", "Liderazgo", "Finanzas"],
-            "Diseño de Interiores": ["Colorimetría", "Textiles", "CAD 3D", "Iluminación Espacial"],
-            "Animación Digital": ["Rigging", "Modelado Orgánico", "Storytelling", "VFX"],
-            "Dirección de Ventas": ["Negociación B2B", "CRM Master", "Psicología del Consumidor"]
+            "Lic. Cinematografía": ["Narrativa Visual", "Cinefotografía I", "Diseño Sonoro", "Post-Producción"],
+            "Ing. Diseño Automotriz": ["Sistemas de Frenado", "Modelado Superficies", "Dinámica de Fluidos", "Materiales Polímeros"],
+            "Lic. Derecho": ["Juicios Orales", "Derecho Corporativo", "Amparo I", "Propiedad Intelectual"],
+            "Ing. Software": ["DevOps & Cloud", "Arquitecturas Limpias", "Inteligencia Artificial", "Testing QA"],
+            "Lic. Administración": ["Gestión Estratégica", "Finanzas Corporativas", "Talento Humano", "Auditoría"],
+            "Lic. Dirección de Ventas": ["Neuroventas", "Estrategia CRM", "Key Account Management", "Forecast Comercial"],
+            "Lic. Arquitectura Digital": ["BIM & Revit", "Renderizado Motor Real-time", "Urbanismo Sostenible"]
         };
 
         let db_alumnos = [];
 
-        // SISTEMA DE LOGIN
         function handleLogin() {
             const email = document.getElementById('auth-email').value;
-            if (email.endsWith('@ucic.edu.mx') || email === 'admin') {
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('profile-name').innerText = email;
+            if (email.includes('@ucic.edu.mx') || email === 'admin') {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('profile-name').innerText = email.split('@')[0].toUpperCase();
                 initApp();
-            } else {
-                alert("Utiliza tu correo institucional @ucic.edu.mx");
             }
         }
 
-        // CAMBIO DE VISTAS
         function switchView(viewId) {
             document.querySelectorAll('.view-content').forEach(v => v.classList.add('hidden'));
-            document.querySelectorAll('.sidebar-item').forEach(v => v.classList.remove('active-nav'));
-            
+            document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
             document.getElementById('view-' + viewId).classList.remove('hidden');
-            document.getElementById('nav-' + viewId).classList.add('active-nav');
+            document.getElementById('nav-' + viewId).classList.add('active');
+            document.getElementById('view-title').innerText = viewId.replace('-',' ');
         }
 
-        // LÓGICA ACADÉMICA
         function initApp() {
             const sel = document.getElementById('ins-carrera');
             sel.innerHTML = Object.keys(CARRERAS).map(c => `<option value="${c}">${c}</option>`).join('');
-            
-            // Mock Leads
-            document.getElementById('leads-body').innerHTML = `
-                <tr class="border-b"><td class="p-4 font-bold">Roberto Gomez</td><td class="p-4 text-xs">Cine</td><td class="p-4"><span class="bg-blue-100 text-blue-600 px-2 py-1 rounded text-[10px] font-black">NUEVO</span></td><td class="p-4"><button class="text-orange-600 font-bold text-xs">Atender</button></td></tr>
-                <tr class="border-b"><td class="p-4 font-bold">Ana Sofía</td><td class="p-4 text-xs">Derecho</td><td class="p-4"><span class="bg-orange-100 text-orange-600 px-2 py-1 rounded text-[10px] font-black">CALIFICADO</span></td><td class="p-4"><button class="text-orange-600 font-bold text-xs">Atender</button></td></tr>
-            `;
-
+            renderLeads();
             initCharts();
+        }
+
+        function renderLeads() {
+            const container = document.getElementById('leads-container');
+            const leads = [
+                {n: "Carlos Mendívil", c: "Ing. Diseño Automotriz", s: "Nuevo", e: "Lic. Arturo"},
+                {n: "Laura Pozos", c: "Lic. Cinematografía", s: "En Seguimiento", e: "Lic. Andrea"}
+            ];
+            container.innerHTML = leads.map(l => `
+                <div class="bg-white p-6 rounded-3xl border border-slate-200 flex items-center justify-between hover:border-orange-300 transition-all shadow-sm">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center font-black">${l.n[0]}</div>
+                        <div>
+                            <p class="font-black text-lg">${l.n}</p>
+                            <p class="text-xs text-slate-400 font-bold uppercase">${l.c}</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-10 items-center">
+                        <div class="text-right">
+                            <p class="text-[10px] font-black text-slate-400 uppercase">Ejecutivo Asignado</p>
+                            <p class="text-xs font-bold">${l.e}</p>
+                        </div>
+                        <span class="px-4 py-2 bg-orange-50 text-orange-600 rounded-xl text-[10px] font-black uppercase tracking-tighter">${l.s}</span>
+                    </div>
+                </div>
+            `).join('');
         }
 
         function inscribirAlumno() {
             const nom = document.getElementById('ins-nombre').value;
             const car = document.getElementById('ins-carrera').value;
             const mat = document.getElementById('ins-matricula').value;
-
-            if(!nom || !mat) return alert("Completa los campos");
-
-            db_alumnos.push({ nom, car, mat });
+            if(!nom || !mat) return;
+            db_alumnos.push({ nom, car, mat, status: 'Al Corriente' });
             renderAlumnos();
             document.getElementById('ins-nombre').value = '';
         }
@@ -200,24 +260,28 @@
         function renderAlumnos() {
             const tabla = document.getElementById('tabla-alumnos-activos');
             tabla.innerHTML = db_alumnos.map((a, i) => `
-                <tr class="border-b">
-                    <td class="py-4 font-black">${a.nom}</td>
-                    <td class="py-4 text-[10px] uppercase text-gray-400 font-bold">${a.car}</td>
-                    <td class="py-4 text-right"><button onclick="verHorario(${i})" class="bg-gray-900 text-white px-4 py-2 rounded-xl text-[10px] font-black">HORARIO</button></td>
+                <tr class="hover:bg-slate-50/50">
+                    <td class="p-6">
+                        <p class="font-black">${a.nom}</p>
+                        <p class="text-[10px] text-slate-400 font-mono">${a.mat}</p>
+                    </td>
+                    <td class="p-6 text-xs font-bold text-slate-600">${a.car}</td>
+                    <td class="p-6"><span class="text-[10px] font-black uppercase text-green-500"><span class="status-dot bg-green-500"></span>${a.status}</span></td>
+                    <td class="p-6"><button onclick="verHorario(${i})" class="bg-slate-100 hover:bg-orange-600 hover:text-white px-4 py-2 rounded-xl text-[10px] font-black transition-all uppercase">Generar Horario</button></td>
                 </tr>
             `).join('');
         }
 
         function verHorario(i) {
             const alu = db_alumnos[i];
-            document.getElementById('panel-horarios').classList.remove('hidden');
-            document.getElementById('nombre-alumno-horario').innerText = alu.nom;
-            
+            const p = document.getElementById('panel-horarios');
+            p.classList.remove('hidden');
+            document.getElementById('nombre-alumno-horario').innerText = `PLAN DE ESTUDIOS PARA ${alu.nom} - ${alu.car}`;
             const mats = CARRERAS[alu.car] || [];
             document.getElementById('lista-materias-disponibles').innerHTML = mats.map(m => `
-                <div class="bg-white p-3 rounded-xl border border-orange-100 flex items-center gap-2">
-                    <input type="checkbox" checked class="accent-orange-600">
-                    <span class="text-xs font-bold text-gray-700">${m}</span>
+                <div class="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/20">
+                    <p class="text-xs font-black uppercase tracking-tight">${m}</p>
+                    <p class="text-[9px] text-orange-200 uppercase mt-1">Modalidad Presencial</p>
                 </div>
             `).join('');
         }
@@ -226,12 +290,17 @@
             const ctx1 = document.getElementById('chartVentas').getContext('2d');
             new Chart(ctx1, {
                 type: 'bar',
-                data: { labels: ['Cine', 'Software', 'Derecho', 'Ventas'], datasets: [{ label: 'Leads por Carrera', data: [12, 19, 3, 5], backgroundColor: '#ea580c' }] }
+                data: { 
+                    labels: ['Cine', 'Auto', 'Software', 'Derecho', 'Ventas'], 
+                    datasets: [{ label: 'Prospectos', data: [45, 82, 31, 22, 55], backgroundColor: '#ea580c', borderRadius: 8 }] 
+                },
+                options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { display: false } }, x: { grid: { display: false } } } }
             });
             const ctx2 = document.getElementById('chartAcademia').getContext('2d');
             new Chart(ctx2, {
                 type: 'doughnut',
-                data: { labels: ['Inscritos', 'Bajas', 'Pendientes'], datasets: [{ data: [300, 20, 50], backgroundColor: ['#111827', '#9ca3af', '#ea580c'] }] }
+                data: { labels: ['Inscritos', 'Pendientes'], datasets: [{ data: [452, 148], backgroundColor: ['#ea580c', '#f1f5f9'], borderWeight: 0 }] },
+                options: { cutout: '80%', plugins: { legend: { position: 'bottom', labels: { font: { weight: 'bold', size: 10 } } } } }
             });
         }
     </script>
