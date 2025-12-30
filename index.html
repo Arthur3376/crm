@@ -16,69 +16,54 @@
         <aside class="sidebar w-64 text-white hidden md:flex flex-col">
             <div class="p-6 text-2xl font-bold border-b border-gray-700 text-orange-500">UCIC CRM</div>
             <nav class="flex-1 p-4">
-                <a href="#" class="block py-2.5 px-4 rounded transition bg-gray-800 text-white mb-2">📊 Dashboard</a>
-                <a href="#" class="block py-2.5 px-4 rounded transition hover:bg-gray-700">👥 Prospectos</a>
-                <a href="#" class="block py-2.5 px-4 rounded transition hover:bg-gray-700">📅 Calendario</a>
-                <a href="#" class="block py-2.5 px-4 rounded transition hover:bg-gray-700">⚙️ Configuración</a>
+                <a href="index.html" class="block py-2.5 px-4 rounded transition bg-gray-800 text-white mb-2">📊 Dashboard</a>
+                <a href="#" class="block py-2.5 px-4 rounded transition hover:bg-gray-700 mb-2 text-gray-400">👥 Prospectos</a>
+                
+                <div class="mt-8 mb-2 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Enlaces Externos</div>
+                <a href="prospectos.html" target="_blank" class="block py-2.5 px-4 rounded transition border border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white font-bold flex items-center justify-between">
+                    🌐 Ver Sitio Público
+                    <span class="text-xs">↗</span>
+                </a>
             </nav>
+            <div class="p-4 border-t border-gray-700 text-xs text-gray-500 text-center">
+                UCIC Sistema de Admisión v1.0
+            </div>
         </aside>
 
         <main class="flex-1 overflow-y-auto">
-            <header class="bg-white shadow-sm p-4 flex justify-between items-center">
+            <header class="bg-white shadow-sm p-4 flex justify-between items-center sticky top-0 z-10">
                 <h1 class="text-xl font-semibold text-gray-800">Panel de Control UCIC 2026</h1>
                 <div class="flex items-center space-x-4">
                     <span class="text-sm text-gray-500 italic">Bienvenido, Arturo</span>
-                    <div class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center text-orange-600 font-bold">A</div>
+                    <div class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center text-orange-600 font-bold border-2 border-orange-500">A</div>
                 </div>
             </header>
 
             <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-orange-500">
+                <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-orange-500 hover:shadow-md transition">
                     <p class="text-sm text-gray-500 font-bold uppercase">Nuevos Prospectos</p>
                     <p class="text-3xl font-bold">124</p>
                 </div>
-                <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-blue-500">
+                <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-blue-500 hover:shadow-md transition">
                     <p class="text-sm text-gray-500 font-bold uppercase">En Seguimiento</p>
                     <p class="text-3xl font-bold">45</p>
                 </div>
-                <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-green-500">
+                <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-green-500 hover:shadow-md transition">
                     <p class="text-sm text-gray-500 font-bold uppercase">Inscritos Hoy</p>
                     <p class="text-3xl font-bold">8</p>
                 </div>
             </div>
 
             <div class="p-6">
-                <div class="bg-white rounded-xl shadow-sm border p-6">
-                    <h2 class="text-lg font-bold mb-4">Actividad Reciente</h2>
-                    <p class="text-gray-400 text-center py-10 italic">Aquí aparecerán los datos que lleguen desde n8n...</p>
+                <div class="bg-white rounded-xl shadow-sm border p-6 min-h-[300px] flex flex-col items-center justify-center text-center">
+                    <div class="bg-gray-100 p-4 rounded-full mb-4">
+                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <h2 class="text-lg font-bold mb-2">Actividad Reciente</h2>
+                    <p class="text-gray-400 italic">Esperando datos desde n8n... Los nuevos registros aparecerán aquí automáticamente.</p>
                 </div>
             </div>
         </main>
-    </div>
-
-    <script>
-        function enviarDatosN8N() {
-            const nombre = document.getElementById('u-nombre').value;
-            const tel = document.getElementById('u-tel').value;
-            const webhook_url = "https://n8n.srv1069873.hstgr.cloud/webhook/4543e689-cbeb-4d02-a33f-dd8c1683b2f9";
-            if(!nombre || !tel) { alert("Por favor llena todos los campos"); return; }
-            const payload = { nombre: nombre, whatsapp: tel, fecha: new Date().toISOString() };
-            navigator.sendBeacon(webhook_url, new Blob([JSON.stringify(payload)], {type: 'application/json'}));
-            window.open(`https://wa.me/522221361386?text=Hola,%20soy%20${nombre}.%20Me%20interesan%20los%20informes%20UCIC%202026`, '_blank');
-            document.getElementById('modal-ucic').style.display = 'none';
-        }
-    </script>
-    <div onclick="document.getElementById('modal-ucic').style.display='flex'" style="position:fixed; bottom:30px; right:30px; background:#25D366; width:60px; height:60px; border-radius:50px; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 4px 15px rgba(0,0,0,0.3); z-index:9999;">
-        <svg width="35" height="35" fill="white" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-    </div>
-    <div id="modal-ucic" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:99999; align-items:center; justify-content:center; padding:20px;">
-        <div style="background:white; padding:40px; border-radius:25px; width:100%; max-width:400px; text-align:center; position:relative; border-top:8px solid #ea580c;">
-            <h2 style="font-weight:900; color:#111827; margin-bottom:10px;">SOLICITAR <span style="color:#ea580c;">INFORMES</span></h2>
-            <input type="text" id="u-nombre" placeholder="Nombre completo" style="width:100%; padding:15px; margin-bottom:12px; border:2px solid #eee; border-radius:12px;">
-            <input type="tel" id="u-tel" placeholder="WhatsApp (10 dígitos)" style="width:100%; padding:15px; margin-bottom:20px; border:2px solid #eee; border-radius:12px;">
-            <button onclick="enviarDatosN8N()" style="width:100%; background:#ea580c; color:white; padding:18px; border-radius:12px; border:none; font-weight:bold; cursor:pointer;">ENVIAR INFORMACIÓN</button>
-            <p onclick="document.getElementById('modal-ucic').style.display='none'" style="margin-top:20px; color:#999; cursor:pointer; font-size:14px;">Cerrar ventana</p>
-        </div>
     </div>
 </body>
 </html>
