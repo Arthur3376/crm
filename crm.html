@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UCIC CORE | Sistema Integral de Gestión Universitaria</title>
+    <title>UCIC CORE | Sistema de Gestión e Inteligencia</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -15,41 +15,42 @@
         .sidebar-item:hover { background: #f1f5f9; color: #ea580c; }
         .active-nav { background: #ea580c !important; color: white !important; box-shadow: 0 10px 15px -3px rgba(234, 88, 12, 0.3); }
         .glass-panel { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border: 1px solid #e2e8f0; }
-        select, input { border: 1px solid #e2e8f0 !important; }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden">
 
-    <div id="login-screen" class="fixed inset-0 z-[100] bg-slate-900 flex items-center justify-center p-6">
-        <div class="bg-white p-10 rounded-[3rem] w-full max-w-md shadow-2xl text-center border border-slate-700">
-            <h2 class="text-3xl font-extrabold mb-2 italic">UCIC <span class="text-orange-600">ERP</span></h2>
-            <p class="text-slate-400 text-sm mb-8">Ingresa con tu cuenta institucional</p>
-            <input type="email" id="auth-email" placeholder="usuario@ucic.edu.mx" class="w-full p-4 bg-slate-50 rounded-2xl mb-4 outline-none focus:ring-2 focus:ring-orange-500 font-bold text-center">
-            <button onclick="handleLogin()" class="w-full bg-slate-900 text-white font-bold py-4 rounded-2xl hover:bg-orange-600 transition-all shadow-lg">Entrar al Sistema</button>
+    <div id="login-screen" class="fixed inset-0 z-[100] bg-slate-900 flex items-center justify-center p-6 text-center">
+        <div class="bg-white p-10 rounded-[3rem] w-full max-w-md shadow-2xl">
+            <h2 class="text-3xl font-black italic mb-2">UCIC <span class="text-orange-600">ERP</span></h2>
+            <p class="text-slate-400 text-sm mb-8 font-bold">ACCESO ADMINISTRATIVO</p>
+            <input type="email" id="auth-email" placeholder="usuario@ucic.edu.mx" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl mb-4 outline-none focus:ring-2 focus:ring-orange-500 font-bold text-center">
+            <button onclick="handleLogin()" class="w-full bg-slate-900 text-white font-black py-4 rounded-2xl hover:bg-orange-600 transition-all shadow-lg uppercase tracking-widest">Entrar</button>
         </div>
     </div>
 
     <nav class="w-72 bg-white border-r border-slate-200 flex flex-col p-6 space-y-8 z-40">
         <div class="px-2">
             <h1 class="text-2xl font-black italic tracking-tighter">UCIC <span class="text-orange-600">CORE</span></h1>
-            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-[0.3em]">Gestión Universitaria v2.0</p>
+            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-[0.3em]">Smart University System</p>
         </div>
         <div class="space-y-2 flex-1">
             <div onclick="switchView('dashboard')" id="nav-dashboard" class="sidebar-item p-4 flex items-center gap-3 font-bold text-sm active-nav"><i class="fa-solid fa-chart-pie"></i> Dashboard</div>
-            <div onclick="switchView('academico')" id="nav-academico" class="sidebar-item p-4 flex items-center gap-3 font-bold text-sm"><i class="fa-solid fa-graduation-cap"></i> Control Académico</div>
-            <div onclick="switchView('leads')" id="nav-leads" class="sidebar-item p-4 flex items-center gap-3 font-bold text-sm"><i class="fa-solid fa-bolt"></i> Leads de Admisiones</div>
+            <div onclick="switchView('academico')" id="nav-academico" class="sidebar-item p-4 flex items-center gap-3 font-bold text-sm"><i class="fa-solid fa-graduation-cap"></i> Académico</div>
+            <div onclick="switchView('leads')" id="nav-leads" class="sidebar-item p-4 flex items-center gap-3 font-bold text-sm"><i class="fa-solid fa-bolt"></i> Leads de n8n</div>
         </div>
         <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-            <p id="user-display" class="text-xs font-black truncate uppercase text-slate-500">Sesión iniciada</p>
-            <button onclick="location.reload()" class="text-[10px] font-bold text-red-500 mt-2 uppercase hover:underline">Cerrar Sesión</button>
+            <p id="user-display" class="text-[10px] font-black uppercase text-slate-500 truncate">Invitado</p>
+            <button onclick="location.reload()" class="text-[10px] font-bold text-red-500 mt-2 hover:underline">CERRAR SESIÓN</button>
         </div>
     </nav>
 
-    <main class="flex-1 flex flex-col relative">
-        <header class="h-20 bg-white/50 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-10">
-            <h2 id="view-title" class="text-xl font-extrabold uppercase tracking-tight text-slate-800 italic">Dashboard</h2>
-            <div id="server-status" class="flex items-center gap-2 text-[10px] font-black px-3 py-1 rounded-full bg-red-100 text-red-600 transition-all">
-                <i class="fa-solid fa-circle text-[6px]"></i> SERVIDOR LOCAL: DESCONECTADO
+    <main class="flex-1 flex flex-col relative overflow-hidden">
+        <header class="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-10">
+            <h2 id="view-title" class="text-xl font-extrabold uppercase italic">Dashboard</h2>
+            <div id="server-status" class="text-[10px] font-black px-4 py-1.5 rounded-full bg-red-100 text-red-600">
+                SERVIDOR LOCAL: OFF
             </div>
         </header>
 
@@ -57,17 +58,17 @@
             
             <div id="view-dashboard" class="view-content space-y-8">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-200">
-                        <p class="text-slate-400 text-[10px] font-black uppercase">Alumnos Activos</p>
-                        <h3 id="count-alumnos" class="text-4xl font-black mt-2">0</h3>
+                    <div class="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm">
+                        <p class="text-slate-400 text-[10px] font-black uppercase">Matrícula Total</p>
+                        <h3 id="count-alumnos" class="text-5xl font-black mt-2">0</h3>
                     </div>
-                    <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-200">
-                        <p class="text-slate-400 text-[10px] font-black uppercase">Conversión n8n</p>
-                        <h3 class="text-4xl font-black mt-2 text-orange-600">32%</h3>
+                    <div class="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm">
+                        <p class="text-slate-400 text-[10px] font-black uppercase">Prospectos n8n</p>
+                        <h3 id="count-leads" class="text-5xl font-black mt-2 text-orange-600">0</h3>
                     </div>
-                    <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-200">
-                        <p class="text-slate-400 text-[10px] font-black uppercase">Ingresos Mensuales</p>
-                        <h3 class="text-4xl font-black mt-2 text-blue-600">$4.2M</h3>
+                    <div class="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm bg-orange-600 text-white border-none">
+                        <p class="text-orange-100 text-[10px] font-black uppercase">Meta de Captación</p>
+                        <h3 class="text-5xl font-black mt-2 italic">85%</h3>
                     </div>
                 </div>
                 <div class="bg-white p-10 rounded-[3rem] border border-slate-200 shadow-sm">
@@ -78,52 +79,56 @@
             <div id="view-academico" class="view-content hidden">
                 <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
                     <div class="lg:col-span-1">
-                        <div class="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-xl sticky top-0">
-                            <h3 class="font-black text-orange-600 mb-6 uppercase text-sm italic">Inscripción Oficial</h3>
+                        <div class="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-xl">
+                            <h3 class="font-black text-orange-600 mb-6 uppercase text-sm italic">Nuevo Ingreso</h3>
                             <div class="space-y-4">
-                                <input id="ins-nombre" type="text" placeholder="Nombre completo" class="w-full p-4 bg-slate-50 rounded-2xl outline-none focus:ring-2 focus:ring-orange-500 font-bold">
-                                <select id="ins-carrera" class="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-sm">
-                                    <option value="Cinematografía">Lic. Cinematografía</option>
-                                    <option value="Diseño Automotriz">Ing. Diseño Automotriz</option>
-                                    <option value="Derecho">Lic. Derecho</option>
-                                    <option value="Software">Ing. de Software</option>
-                                    <option value="Administración">Lic. Administración</option>
-                                    <option value="Animación Digital">Lic. Animación Digital</option>
-                                    <option value="Dirección de Ventas">Lic. Dirección de Ventas</option>
+                                <input id="ins-nombre" type="text" placeholder="Nombre completo" class="w-full p-4 bg-slate-50 border rounded-2xl font-bold outline-none focus:ring-2 focus:ring-orange-500">
+                                <select id="ins-carrera" class="w-full p-4 bg-slate-50 border rounded-2xl font-bold text-sm outline-none">
+                                    <option value="Cinematografía">Cinematografía</option>
+                                    <option value="Diseño Automotriz">Diseño Automotriz</option>
+                                    <option value="Software">Ing. Software</option>
+                                    <option value="Derecho">Derecho</option>
                                 </select>
-                                <input id="ins-mat" type="text" placeholder="Matrícula (Ej: 2026-001)" class="w-full p-4 bg-slate-50 rounded-2xl outline-none">
-                                <button onclick="inscribir()" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-orange-600 transition-all">Sincronizar e Inscribir</button>
+                                <input id="ins-mat" type="text" placeholder="ID / Matrícula" class="w-full p-4 bg-slate-50 border rounded-2xl font-bold outline-none">
+                                <button onclick="inscribir()" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-orange-600 transition-all">Inscribir en Servidor</button>
                             </div>
                         </div>
                     </div>
                     <div class="lg:col-span-3">
-                        <div class="bg-white rounded-[2rem] border border-slate-200 overflow-hidden shadow-sm">
+                        <div class="bg-white rounded-[2.5rem] border border-slate-200 overflow-hidden shadow-sm">
                             <table class="w-full text-left">
-                                <thead class="bg-slate-50 border-b border-slate-100 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                                    <tr><th class="p-6">Expediente del Alumno</th><th class="p-6">Programa Académico</th><th class="p-6 text-right">Acciones</th></tr>
+                                <thead class="bg-slate-50 border-b text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                    <tr><th class="p-6">Estudiante</th><th class="p-6">Carrera</th><th class="p-6 text-right">Control</th></tr>
                                 </thead>
-                                <tbody id="tabla-alumnos" class="divide-y divide-slate-50 font-bold"></tbody>
+                                <tbody id="tabla-alumnos" class="divide-y divide-slate-100"></tbody>
                             </table>
                         </div>
                     </div>
                 </div>
             </div>
 
+            <div id="view-leads" class="view-content hidden space-y-6">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-2xl font-black italic">BANDEJA DE ENTRADA (N8N)</h3>
+                    <button onclick="initServerCheck()" class="bg-slate-100 p-2 px-4 rounded-xl text-[10px] font-black hover:bg-slate-200">ACTUALIZAR LEADS</button>
+                </div>
+                <div id="grid-leads" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    </div>
+            </div>
+
         </section>
 
         <div id="panel-horarios" class="fixed inset-0 z-50 bg-slate-950/95 hidden overflow-y-auto p-10 flex items-center justify-center">
             <div class="max-w-4xl w-full bg-white rounded-[3rem] p-12 shadow-2xl relative">
-                <button onclick="document.getElementById('panel-horarios').classList.add('hidden')" class="absolute top-8 right-8 text-slate-400 hover:text-orange-600 text-2xl transition-all"><i class="fa-solid fa-circle-xmark"></i></button>
+                <button onclick="document.getElementById('panel-horarios').classList.add('hidden')" class="absolute top-8 right-8 text-slate-400 hover:text-orange-600 text-2xl"><i class="fa-solid fa-circle-xmark"></i></button>
                 <div class="mb-10">
-                    <h3 id="horario-nombre" class="text-4xl font-extrabold italic uppercase tracking-tighter">NOMBRE DEL ALUMNO</h3>
-                    <p class="text-orange-600 font-black text-[10px] tracking-widest uppercase mt-1">Configuración de Horario y Plan de Estudios</p>
+                    <h3 id="horario-nombre" class="text-4xl font-extrabold italic uppercase tracking-tighter">NOMBRE</h3>
+                    <p class="text-orange-600 font-black text-[10px] tracking-widest uppercase">Matriz Académica Institucional</p>
                 </div>
-                <div id="lista-materias" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8 max-h-[400px] overflow-y-auto pr-2"></div>
-                <div class="flex flex-col md:flex-row gap-4">
-                    <button onclick="guardarLocal()" class="flex-1 bg-orange-600 text-white p-5 rounded-2xl font-black uppercase text-xs shadow-lg hover:bg-orange-700 transition-all">Sincronizar con Base de Datos Local</button>
-                    <button id="btn-kardex" class="bg-slate-900 text-white p-5 rounded-2xl font-black uppercase text-xs shadow-lg hover:bg-blue-600 transition-all">
-                        <i class="fa-solid fa-file-pdf mr-2"></i> Generar Kardex Oficial
-                    </button>
+                <div id="lista-materias" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8"></div>
+                <div class="flex gap-4">
+                    <button onclick="alert('Cambios sincronizados')" class="flex-1 bg-orange-600 text-white p-5 rounded-2xl font-black uppercase text-xs">Guardar Cambios</button>
+                    <button id="btn-kardex" class="bg-slate-900 text-white p-5 rounded-2xl font-black uppercase text-xs shadow-lg hover:bg-blue-600 transition-all">Imprimir Kardex Oficial</button>
                 </div>
             </div>
         </div>
@@ -132,19 +137,16 @@
     <script>
         const API_URL = 'http://localhost:3000/api';
         let db_alumnos = [];
+        let db_leads = [];
         let alumnoIndexActual = null;
 
         const CARRERAS_DATA = {
-            "Cinematografía": ["Guionismo I", "Dirección de Fotografía", "Edición Digital", "Historia del Cine", "Producción"],
-            "Diseño Automotriz": ["Aerodinámica", "Motores I", "Diseño en Alias", "Materiales Polímeros", "Sistemas Eléctricos"],
-            "Derecho": ["Derecho Romano", "Introducción al Derecho", "Derecho Civil", "Teoría del Estado", "Penal I"],
-            "Software": ["Algoritmos", "Bases de Datos SQL", "Backend Node.js", "Ciberseguridad", "Arquitectura"],
-            "Administración": ["Gestión Estratégica", "Contabilidad I", "Marketing", "Finanzas"],
-            "Animación Digital": ["Modelado 3D", "Rigging", "Storytelling", "Ilustración Digital"],
-            "Dirección de Ventas": ["Neuroventas", "CRM Estratégico", "Key Account Management", "Liderazgo"]
+            "Cinematografía": ["Narrativa Visual", "Cinefotografía", "Montaje", "Historia del Cine"],
+            "Diseño Automotriz": ["Aerodinámica", "Modelado 3D", "Motores de Combustión", "Materiales"],
+            "Software": ["Desarrollo Backend", "Estructura de Datos", "Cloud Computing", "UI/UX"],
+            "Derecho": ["Derecho Civil", "Procesal Penal", "Amparo", "Constitucional"]
         };
 
-        // LOGIN
         function handleLogin() {
             const mail = document.getElementById('auth-email').value;
             if(mail.includes('@') || mail === 'admin') {
@@ -155,38 +157,43 @@
             }
         }
 
-        // CHECAR SERVIDOR LOCAL
         async function initServerCheck() {
             try {
                 const res = await fetch(`${API_URL}/data`);
                 const data = await res.json();
                 db_alumnos = data.alumnos || [];
-                document.getElementById('server-status').className = "flex items-center gap-2 text-[10px] font-black px-3 py-1 rounded-full bg-green-100 text-green-600";
-                document.getElementById('server-status').innerHTML = '<i class="fa-solid fa-circle text-[6px]"></i> SERVIDOR LOCAL: CONECTADO';
+                db_leads = data.leads || [];
+                
+                document.getElementById('server-status').className = "text-[10px] font-black px-4 py-1.5 rounded-full bg-green-100 text-green-600";
+                document.getElementById('server-status').innerText = "SERVIDOR LOCAL: ONLINE";
+                
                 renderAlumnos();
-            } catch (e) {
-                console.log("Servidor local no detectado");
-            }
+                renderLeads();
+            } catch (e) { console.error("Servidor Offline"); }
         }
 
-        // NAVEGACION
         function switchView(id) {
             document.querySelectorAll('.view-content').forEach(v => v.classList.add('hidden'));
             document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active-nav'));
             document.getElementById('view-'+id).classList.remove('hidden');
             document.getElementById('nav-'+id).classList.add('active-nav');
-            document.getElementById('view-title').innerText = id.charAt(0).toUpperCase() + id.slice(1);
+            document.getElementById('view-title').innerText = id;
         }
 
-        // ALTA ALUMNO
-        async function inscribir() {
-            const alu = {
+        async function inscribir(leadData = null) {
+            const alu = leadData ? {
+                nombre: leadData.nombre,
+                carrera: leadData.carrera,
+                mat: "REQ-" + Math.floor(Math.random()*1000),
+                horario: []
+            } : {
                 nombre: document.getElementById('ins-nombre').value,
                 carrera: document.getElementById('ins-carrera').value,
                 mat: document.getElementById('ins-mat').value,
                 horario: []
             };
-            if(!alu.nombre || !alu.mat) return alert("Por favor complete todos los campos");
+
+            if(!alu.nombre) return alert("Faltan datos");
 
             try {
                 await fetch(`${API_URL}/save-alumno`, {
@@ -196,29 +203,42 @@
                 });
                 db_alumnos.push(alu);
                 renderAlumnos();
-                alert("✅ Registrado con éxito en el servidor local.");
-                document.getElementById('ins-nombre').value = "";
-                document.getElementById('ins-mat').value = "";
-            } catch (e) {
-                alert("❌ Error: Asegúrate de que el servidor local (Node.js) esté encendido.");
-            }
+                alert("Alumno registrado en Base de Datos Local");
+            } catch (e) { alert("Error de conexión con el servidor"); }
         }
 
         function renderAlumnos() {
             const t = document.getElementById('tabla-alumnos');
             t.innerHTML = db_alumnos.map((a, i) => `
-                <tr class="hover:bg-slate-50 transition-colors">
-                    <td class="p-6">
-                        <p class="font-black text-slate-800">${a.nombre.toUpperCase()}</p>
-                        <p class="text-[9px] text-slate-400 tracking-tighter">MATRICULA: ${a.mat}</p>
-                    </td>
-                    <td class="p-6 text-xs text-orange-600 uppercase font-black italic tracking-tight">${a.carrera}</td>
-                    <td class="p-6 text-right">
-                        <button onclick="verHorario(${i})" class="bg-slate-900 text-white hover:bg-orange-600 px-6 py-2 rounded-xl text-[10px] font-black transition-all uppercase tracking-widest shadow-sm">Gestionar</button>
-                    </td>
+                <tr class="hover:bg-slate-50 transition-all">
+                    <td class="p-6 font-black text-slate-800">${a.nombre.toUpperCase()} <br><span class="text-[9px] text-slate-400 font-bold">${a.mat}</span></td>
+                    <td class="p-6 text-[10px] font-black text-orange-600 uppercase italic">${a.carrera}</td>
+                    <td class="p-6 text-right"><button onclick="verHorario(${i})" class="bg-slate-900 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase">Gestionar</button></td>
                 </tr>
             `).join('');
             document.getElementById('count-alumnos').innerText = db_alumnos.length;
+        }
+
+        function renderLeads() {
+            const container = document.getElementById('grid-leads');
+            container.innerHTML = db_leads.map((l, i) => `
+                <div class="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-4"><span class="bg-orange-100 text-orange-600 text-[8px] font-black px-2 py-1 rounded-full uppercase italic">Nuevo Lead</span></div>
+                    <h4 class="font-black text-lg mb-1">${l.nombre.toUpperCase()}</h4>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase mb-4 italic">${l.carrera}</p>
+                    <div class="space-y-2 mb-6">
+                        <p class="text-[10px] font-bold"><i class="fa-solid fa-phone mr-2 text-orange-500"></i> ${l.telefono}</p>
+                    </div>
+                    <button onclick="convertirLead(${i})" class="w-full bg-slate-900 text-white py-3 rounded-xl font-black text-[10px] uppercase group-hover:bg-orange-600 transition-all">Convertir a Alumno</button>
+                </div>
+            `).join('');
+            document.getElementById('count-leads').innerText = db_leads.length;
+        }
+
+        function convertirLead(i) {
+            const lead = db_leads[i];
+            inscribir(lead);
+            // Opcional: Eliminar lead de la lista después de convertirlo
         }
 
         function verHorario(i) {
@@ -226,25 +246,17 @@
             const alu = db_alumnos[i];
             document.getElementById('panel-horarios').classList.remove('hidden');
             document.getElementById('horario-nombre').innerText = alu.nombre;
-            
-            const mats = CARRERAS_DATA[alu.carrera] || ["Materia General 1", "Materia General 2"];
+            const mats = CARRERAS_DATA[alu.carrera] || ["Materia Base 1", "Materia Base 2"];
             document.getElementById('lista-materias').innerHTML = mats.map(m => `
-                <div class="bg-slate-50 p-5 rounded-3xl border border-slate-100 space-y-3">
-                    <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest">${m}</p>
-                    <div class="grid grid-cols-2 gap-2">
-                        <select class="bg-white border text-[10px] p-2 rounded-xl font-bold outline-none">
-                            <option>LUNES - MIÉRCOLES</option><option>MARTES - JUEVES</option><option>SÁBADO (SABATINO)</option>
-                        </select>
-                        <select class="bg-white border text-[10px] p-2 rounded-xl font-bold outline-none">
-                            <option>07:00 - 09:00</option><option>09:00 - 11:00</option><option>18:00 - 20:00</option>
-                        </select>
+                <div class="bg-slate-50 p-5 rounded-3xl border">
+                    <p class="text-[10px] font-black uppercase text-slate-400 mb-2">${m}</p>
+                    <div class="grid grid-cols-2 gap-2 mb-2">
+                        <select class="bg-white p-2 rounded-lg text-[9px] font-bold border"><option>LUN-MIE</option><option>MAR-JUE</option></select>
+                        <select class="bg-white p-2 rounded-lg text-[9px] font-bold border"><option>07:00-09:00</option><option>18:00-20:00</option></select>
                     </div>
-                    <select class="w-full bg-slate-900 text-white text-[9px] p-2 rounded-xl font-black uppercase tracking-widest">
-                        <option value="presencial">📍 Modalidad Presencial</option><option value="hibrido">💻 Modalidad Híbrida</option>
-                    </select>
+                    <select class="w-full bg-slate-900 text-white p-2 rounded-lg text-[8px] font-black uppercase tracking-widest"><option>Presencial</option><option>Híbrido</option></select>
                 </div>
             `).join('');
-
             document.getElementById('btn-kardex').onclick = () => generarKardex(i);
         }
 
@@ -252,57 +264,24 @@
             const alu = db_alumnos[i];
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
-            
-            // LOGO PLACEHOLDER
-            doc.setFillColor(234, 88, 12);
-            doc.rect(20, 15, 10, 10, 'F');
-
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(22); doc.text("UNIVERSIDAD UCIC", 105, 25, { align: "center" });
-            doc.setFontSize(9); doc.setFont("helvetica", "normal");
-            doc.text("SISTEMA DE GESTIÓN ACADÉMICA Y CONTROL ESCOLAR", 105, 32, { align: "center" });
-            doc.line(20, 38, 190, 38);
-
-            doc.setFillColor(245, 245, 245);
-            doc.rect(20, 45, 170, 35, 'F');
-            doc.setFontSize(10); doc.setFont("helvetica", "bold");
-            doc.text("EXPEDIENTE DEL ALUMNO", 25, 52);
-            doc.setFont("helvetica", "normal");
-            doc.text(`NOMBRE: ${alu.nombre.toUpperCase()}`, 25, 60);
-            doc.text(`PROGRAMA: ${alu.carrera.toUpperCase()}`, 25, 67);
-            doc.text(`MATRÍCULA: ${alu.mat}`, 130, 60);
-            doc.text(`PROMEDIO: 9.2 (Global)`, 130, 67);
-
-            doc.setFont("helvetica", "bold");
-            doc.text("ASIGNATURA", 25, 95); doc.text("MODALIDAD", 120, 95); doc.text("ESTADO", 160, 95);
-            doc.line(20, 98, 190, 98);
-            
-            doc.setFont("helvetica", "normal");
-            let y = 108;
+            doc.setFont("helvetica", "bold"); doc.setFontSize(22); doc.text("UNIVERSIDAD UCIC", 105, 25, { align: "center" });
+            doc.setFontSize(9); doc.text("KARDEX OFICIAL DE CALIFICACIONES", 105, 32, { align: "center" });
+            doc.rect(20, 45, 170, 30);
+            doc.text(`ALUMNO: ${alu.nombre.toUpperCase()}`, 25, 55);
+            doc.text(`CARRERA: ${alu.carrera.toUpperCase()}`, 25, 65);
+            doc.text(`ID: ${alu.mat}`, 140, 60);
+            let y = 95;
             const mats = CARRERAS_DATA[alu.carrera] || [];
-            mats.forEach(m => {
-                doc.text(m, 25, y); doc.text("PRESENCIAL", 120, y); doc.text("CURSANDO", 160, y);
-                y += 10;
-            });
-
-            doc.line(60, 260, 150, 260); 
-            doc.setFontSize(8); doc.text("FIRMA DE RECTORÍA / SELLO INSTITUCIONAL", 105, 265, { align: "center" });
-            doc.rect(160, 245, 25, 25); doc.setFontSize(6); doc.text("VALIDACIÓN QR", 172.5, 273, { align: "center" });
-
-            doc.save(`Kardex_UCIC_${alu.nombre}.pdf`);
-        }
-
-        async function guardarLocal() {
-            alert("⚠️ Sincronizando estados con el servidor local...");
-            document.getElementById('panel-horarios').classList.add('hidden');
+            mats.forEach(m => { doc.text(m, 25, y); doc.text("CURSANDO", 160, y); y += 10; });
+            doc.save(`Kardex_${alu.nombre}.pdf`);
         }
 
         function initCharts() {
             const ctx = document.getElementById('chartGlobal').getContext('2d');
             new Chart(ctx, {
                 type: 'line',
-                data: { labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'], datasets: [{ label: 'Nuevos Alumnos', data: [12, 19, 35, 50, 85, 120], borderColor: '#ea580c', tension: 0.4, fill: true, backgroundColor: 'rgba(234, 88, 12, 0.1)' }] },
-                options: { plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false } } } }
+                data: { labels: ['Set', 'Oct', 'Nov', 'Dic'], datasets: [{ label: 'Prospectos', data: [15, 28, 42, 65], borderColor: '#ea580c', tension: 0.4 }] },
+                options: { plugins: { legend: { display: false } }, scales: { y: { display: false } } }
             });
         }
     </script>
