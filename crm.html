@@ -88,50 +88,80 @@
     </div>
 
     <script>
-        const data = {
-            dashboard: [
-                { id: "001", nombre: "Juan Pérez", info: "Interesado en Cine", status: "Caliente", color: "bg-red-100 text-red-700" },
-                { id: "002", nombre: "Maria Garcia", info: "Pide Beca 50%", status: "Enviado", color: "bg-blue-100 text-blue-700" },
-                { id: "003", nombre: "Carlos Slim", info: "Inscrito", status: "Cerrado", color: "bg-green-100 text-green-700" }
-            ],
-            inventario: [
-                { id: "EQU-01", nombre: "Cámara Sony A7III", info: "Bodega Santiago", status: "Disponible", color: "bg-green-100 text-green-700" },
-                { id: "EQU-02", nombre: "Drone Mavic 3", info: "En Préstamo", status: "Ocupado", color: "bg-orange-100 text-orange-700" }
-            ],
-            pagos: [
-                { id: "PAG-99", nombre: "Inscripción Enero", info: "$4,500.00", status: "Pagado", color: "bg-green-100 text-green-700" },
-                { id: "PAG-100", nombre: "Mensualidad Feb", info: "$3,200.00", status: "Pendiente", color: "bg-red-100 text-red-700" }
-            ]
-        };
+        // CONFIGURACIÓN: Reemplaza con tu URL de n8n que devuelve la lista de prospectos
+const N8N_GET_PROSPECTOS_URL = "https://n8n.srv1069873.hstgr.cloud/webhook/tu-id-de-lectura";
 
-        function changeView(view) {
-            // Actualizar Título
-            const titles = { dashboard: "Dashboard General", prospectos: "Gestión de Prospectos", inventario: "Control de Activos", pagos: "Finanzas y Pagos" };
-            document.getElementById('view-title').innerText = titles[view];
+async function cargarProspectosReales() {
+    try {
+        const response = await fetch(N8N_GET_PROSPECTOS_URL);
+        const prospectosDesdeN8n = await response.json();
+        
+        // Mapeamos los datos de n8n al formato de nuestra tabla
+        data.prospectos = prospectosDesdeN8n.map((p, index) => ({
+            id: `PRO-${100 + index}`,
+            nombre: p.nombre || "Sin nombre",
+            info: p.carrera || "Interés general",
+            status: "Nuevo",
+            color: "bg-orange-100 text-orange-700"
+        }));
 
-            // Actualizar Menú Activo
-            document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active-menu'));
-            document.getElementById('btn-' + view).classList.add('active-menu');
-
-            // Generar Tabla Dinámica
-            let tableHTML = `<table class="w-full text-left text-sm"><thead class="bg-gray-50 text-gray-400 font-bold uppercase text-[10px]"><tr><th class="p-4">ID/Ref</th><th class="p-4">Nombre / Concepto</th><th class="p-4">Información</th><th class="p-4">Estado</th></tr></thead><tbody class="divide-y">`;
-            
-            const currentData = data[view] || data.dashboard;
-            currentData.forEach(item => {
-                tableHTML += `<tr>
-                    <td class="p-4 font-mono text-xs text-gray-400">${item.id}</td>
-                    <td class="p-4 font-bold text-slate-700">${item.nombre}</td>
-                    <td class="p-4 text-gray-500">${item.info}</td>
-                    <td class="p-4"><span class="${item.color} px-3 py-1 rounded-full text-[10px] font-black uppercase">${item.status}</span></td>
-                </tr>`;
-            });
-            tableHTML += `</tbody></table>`;
-            
-            document.getElementById('table-dynamic').innerHTML = tableHTML;
+        // Si estamos en la vista de prospectos, refrescamos la tabla
+        if (currentView === 'prospectos') {
+            renderTable('prospectos');
         }
+    } catch (error) {
+        console.error("Error cargando prospectos:", error);
+    }
+}
 
-        // Cargar vista inicial
-        changeView('dashboard');
+// Modificamos la función changeView para que sea más inteligente
+let currentView = 'dashboard';
+
+function changeView(view) {
+    currentView = view;
+    const titles = { 
+        dashboard: "Dashboard General", 
+        prospectos: "Gestión de Prospectos (Datos Reales)", 
+        inventario: "Control de Activos", 
+        pagos: "Finanzas y Pagos" 
+    };
+    
+    document.getElementById('view-title').innerText = titles[view];
+    document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active-menu'));
+    document.getElementById('btn-' + view).classList.add('active-menu');
+
+    if (view === 'prospectos') {
+        renderTable(view, true); // true para mostrar mensaje de "cargando"
+        cargarProspectosReales();
+    } else {
+        renderTable(view);
+    }
+}
+
+function renderTable(view, loading = false) {
+    const container = document.getElementById('table-dynamic');
+    if (loading) {
+        container.innerHTML = `<div class="p-10 text-center italic text-gray-400">Consultando base de datos en tiempo real...</div>`;
+        return;
+    }
+
+    let tableHTML = `<table class="w-full text-left text-sm"><thead class="bg-gray-50 text-gray-400 font-bold uppercase text-[10px]"><tr><th class="p-4">ID/Ref</th><th class="p-4">Nombre / Concepto</th><th class="p-4">Información</th><th class="p-4">Estado</th></tr></thead><tbody class="divide-y">`;
+    
+    const currentData = data[view] || [];
+    currentData.forEach(item => {
+        tableHTML += `<tr>
+            <td class="p-4 font-mono text-xs text-gray-400">${item.id}</td>
+            <td class="p-4 font-bold text-slate-700">${item.nombre}</td>
+            <td class="p-4 text-gray-500">${item.info}</td>
+            <td class="p-4"><span class="${item.color} px-3 py-1 rounded-full text-[10px] font-black uppercase">${item.status}</span></td>
+        </tr>`;
+    });
+    tableHTML += `</tbody></table>`;
+    container.innerHTML = tableHTML;
+}
+
+// Ejecutar al cargar
+changeView('dashboard');
     </script>
 </body>
 </html>
