@@ -3,305 +3,206 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UCIC | Sistema de Gestión Integral</title>
+    <title>ERP UCIC - Centro de Control Académico</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f8fafc; }
-        .glass-card { background: rgba(255, 255, 255, 0.9); border: 1px solid #e2e8f0; backdrop-filter: blur(10px); }
-        .sidebar-link { transition: all 0.2s; border-radius: 12px; margin-bottom: 4px; }
-        .sidebar-link.active { background: #ea580c; color: white; box-shadow: 0 10px 15px -3px rgba(234, 88, 12, 0.3); }
-        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background: #0f172a; color: white; }
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        .btn-grad { background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); }
     </style>
 </head>
-<body class="flex h-screen overflow-hidden text-slate-800">
+<body class="min-h-screen overflow-x-hidden">
 
-    <div id="login-screen" class="fixed inset-0 z-[500] bg-slate-900 flex items-center justify-center p-6">
-        <div class="bg-white p-10 rounded-[3rem] w-full max-w-md shadow-2xl border border-slate-700">
-            <div class="w-20 h-20 bg-orange-100 rounded-3xl flex items-center justify-center mx-auto mb-6">
-                <i class="fa-solid fa-shield-halved text-orange-600 text-3xl"></i>
+    <div id="login-screen" class="fixed inset-0 z-[100] bg-slate-950 flex items-center justify-center p-6">
+        <div class="glass max-w-md w-full p-8 rounded-[2rem] text-center">
+            <div class="mb-6 inline-flex items-center justify-center w-20 h-20 rounded-full bg-orange-500/20 text-orange-500 text-4xl shadow-[0_0_50px_rgba(249,115,22,0.3)]">
+                <i class="fa-solid fa-shield-halved"></i>
             </div>
-            <h2 class="text-3xl font-extrabold text-center mb-2">Bienvenido</h2>
-            <p class="text-slate-400 text-center text-sm mb-8">Ingresa tus credenciales corporativas</p>
-            <input type="email" id="auth-email" placeholder="usuario@ucic.edu.mx" class="w-full p-4 bg-slate-50 rounded-2xl mb-4 border border-slate-200 outline-none focus:border-orange-500 transition-all font-semibold">
-            <button onclick="handleLogin()" class="w-full bg-orange-600 text-white font-bold py-4 rounded-2xl hover:bg-orange-700 shadow-lg shadow-orange-200 transition-all">Acceder al Sistema</button>
+            <h1 class="text-3xl font-black mb-2 tracking-tighter italic">UCIC ACADEMY</h1>
+            <p class="text-slate-400 text-sm mb-8">Acceso restringido a personal administrativo</p>
+            <input type="email" id="user-mail" placeholder="Usuario / Correo institucional" class="w-full bg-slate-900 border border-slate-700 p-4 rounded-2xl mb-4 focus:ring-2 focus:ring-orange-500 outline-none transition-all">
+            <button onclick="intentarEntrar()" class="w-full btn-grad p-4 rounded-2xl font-black uppercase tracking-widest shadow-lg active:scale-95 transition-all">Entrar al Sistema</button>
         </div>
     </div>
 
-    <aside class="w-72 bg-white border-r border-slate-200 flex flex-col p-6 space-y-8">
-        <div>
-            <h1 class="text-2xl font-extrabold tracking-tighter italic">UCIC<span class="text-orange-600">.EDU</span></h1>
-            <p class="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">Enterprise Resource Planning</p>
-        </div>
-
-        <nav class="flex-1">
-            <p class="text-[10px] font-extrabold text-slate-400 uppercase mb-4 px-4">Menu Principal</p>
-            <div onclick="switchView('dashboard')" id="nav-dashboard" class="sidebar-link active p-4 flex items-center gap-3 cursor-pointer font-semibold text-sm">
-                <i class="fa-solid fa-grid-2"></i> Dashboard Global
+    <div class="p-6 lg:p-12 max-w-7xl mx-auto">
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+            <div>
+                <h2 class="text-4xl font-black italic tracking-tighter">CONTROL ACADÉMICO <span class="text-orange-500">UCIC</span></h2>
+                <p class="text-slate-400 font-medium">Gestión Universitaria y CRM</p>
             </div>
-            <div onclick="switchView('leads')" id="nav-leads" class="sidebar-link p-4 flex items-center gap-3 cursor-pointer font-semibold text-sm hover:bg-slate-50">
-                <i class="fa-solid fa-bolt"></i> Pipeline de Leads
-            </div>
-            <div onclick="switchView('academico')" id="nav-academico" class="sidebar-link p-4 flex items-center gap-3 cursor-pointer font-semibold text-sm hover:bg-slate-50">
-                <i class="fa-solid fa-graduation-cap"></i> Control Académico
-            </div>
-            <div onclick="switchView('multimedia')" id="nav-multimedia" class="sidebar-link p-4 flex items-center gap-3 cursor-pointer font-semibold text-sm hover:bg-slate-50">
-                <i class="fa-solid fa-video"></i> Repositorio Teams
-            </div>
-        </nav>
-
-        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-            <div class="flex items-center gap-3 mb-3">
-                <div class="w-8 h-8 rounded-full bg-orange-500 text-white flex items-center justify-center text-xs font-bold">AD</div>
-                <div>
-                    <p class="text-xs font-bold" id="profile-name">Administrador</p>
-                    <p class="text-[9px] text-slate-400">Servidor Local v1.0</p>
-                </div>
-            </div>
-            <button onclick="location.reload()" class="w-full text-left text-[10px] font-bold text-red-500 hover:text-red-700"><i class="fa-solid fa-power-off mr-1"></i> CERRAR SESIÓN</button>
-        </div>
-    </aside>
-
-    <main class="flex-1 flex flex-col">
-        <header class="h-20 bg-white/50 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-10">
-            <h2 id="view-title" class="text-xl font-extrabold uppercase tracking-tight">Dashboard Global</h2>
-            <div class="flex items-center gap-6">
-                <div class="flex gap-2">
-                    <span class="px-3 py-1 bg-green-100 text-green-600 rounded-full text-[10px] font-black underline">SISTEMA ONLINE</span>
-                    <span id="db-status" class="px-3 py-1 bg-orange-100 text-orange-600 rounded-full text-[10px] font-black">LOCAL DB: CONNECTED</span>
-                </div>
+            <div class="flex gap-4">
+                <button onclick="document.getElementById('modal-inscripcion').classList.remove('hidden')" class="btn-grad px-6 py-3 rounded-2xl font-black text-xs uppercase shadow-xl hover:shadow-orange-500/20 transition-all">
+                    <i class="fa-solid fa-user-plus mr-2"></i> Nuevo Alumno
+                </button>
             </div>
         </header>
 
-        <section id="viewport" class="p-10 overflow-y-auto">
+        <div class="glass rounded-[2.5rem] overflow-hidden">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="border-b border-white/10 bg-white/5">
+                        <th class="p-6 text-[10px] font-black uppercase text-slate-400">Alumno / Carrera</th>
+                        <th class="p-6 text-[10px] font-black uppercase text-slate-400 text-center">Gestión Académica</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-alumnos">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="modal-inscripcion" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-sm hidden flex items-center justify-center p-6">
+        <div class="glass max-w-lg w-full p-8 rounded-[2.5rem] relative">
+            <button onclick="this.parentElement.parentElement.classList.add('hidden')" class="absolute top-6 right-6 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-2xl"></i></button>
+            <h3 class="text-2xl font-black mb-6">FORMULARIO DE ADMISIÓN</h3>
+            <div class="space-y-4">
+                <input type="text" id="ins-nombre" placeholder="Nombre completo" class="w-full bg-slate-800 p-4 rounded-2xl border-none outline-none focus:ring-2 focus:ring-orange-500">
+                <select id="ins-carrera" class="w-full bg-slate-800 p-4 rounded-2xl border-none outline-none focus:ring-2 focus:ring-orange-500 appearance-none">
+                    <option value="cine">Lic. Cinematografía</option>
+                    <option value="derecho">Lic. Derecho</option>
+                    <option value="diseno">Lic. Diseño Gráfico</option>
+                </select>
+                <button onclick="inscribir()" class="w-full btn-grad p-4 rounded-2xl font-black uppercase tracking-widest mt-4">Inscribir Alumno</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="panel-horarios" class="fixed inset-0 z-50 bg-slate-950/95 hidden overflow-y-auto p-6 lg:p-20">
+        <div class="max-w-4xl mx-auto">
+            <header class="flex justify-between items-center mb-10">
+                <div>
+                    <h4 id="nombre-alumno-horario" class="text-3xl font-black text-orange-500 italic">CARGANDO...</h4>
+                    <p class="text-slate-400 font-bold uppercase text-[10px] tracking-[0.3em]">Asignación de Materias y Horas</p>
+                </div>
+                <button onclick="document.getElementById('panel-horarios').classList.add('hidden')" class="bg-white/10 w-12 h-12 rounded-full flex items-center justify-center hover:bg-orange-600 transition-all"><i class="fa-solid fa-chevron-down"></i></button>
+            </header>
             
-            <div id="view-dashboard" class="view-content">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-                    <div class="glass-card p-8 rounded-[2rem] shadow-xl shadow-slate-200/50">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="p-3 bg-orange-50 rounded-2xl text-orange-600"><i class="fa-solid fa-user-group text-xl"></i></div>
-                            <span class="text-xs font-bold text-green-500">+14%</span>
-                        </div>
-                        <p class="text-slate-400 text-xs font-bold uppercase">Total Leads Semanales</p>
-                        <h3 class="text-4xl font-black mt-1">284</h3>
-                    </div>
-                    <div class="glass-card p-8 rounded-[2rem] shadow-xl shadow-slate-200/50">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="p-3 bg-blue-50 rounded-2xl text-blue-600"><i class="fa-solid fa-graduation-cap text-xl"></i></div>
-                            <span class="text-xs font-bold text-blue-500">Meta: 500</span>
-                        </div>
-                        <p class="text-slate-400 text-xs font-bold uppercase">Alumnos Inscritos</p>
-                        <h3 class="text-4xl font-black mt-1 text-slate-900">452</h3>
-                    </div>
-                    <div class="glass-card p-8 rounded-[2rem] shadow-xl shadow-slate-200/50 border-orange-200 bg-orange-50/30">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="p-3 bg-white rounded-2xl text-slate-900 shadow-sm"><i class="fa-solid fa-wallet text-xl"></i></div>
-                        </div>
-                        <p class="text-slate-400 text-xs font-bold uppercase italic text-orange-800">Proyección Mensual</p>
-                        <h3 class="text-4xl font-black mt-1">$4.2M</h3>
-                    </div>
+            <div id="lista-materias-disponibles" class="grid grid-cols-1 md:grid-cols-2 gap-6 pb-20">
                 </div>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                    <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
-                        <h4 class="font-extrabold mb-8 flex items-center gap-2"><i class="fa-solid fa-chart-simple text-orange-600"></i> Rendimiento por Carrera</h4>
-                        <canvas id="chartVentas" height="250"></canvas>
-                    </div>
-                    <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 text-center">
-                        <h4 class="font-extrabold mb-8 text-left">Distribución Académica</h4>
-                        <div class="w-64 mx-auto"><canvas id="chartAcademia"></canvas></div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="view-leads" class="view-content hidden">
-                <div class="flex justify-between items-end mb-8">
-                    <div>
-                        <h2 class="text-3xl font-black">Pipeline de Ventas</h2>
-                        <p class="text-slate-400 text-sm">Monitoreo de leads captados vía n8n</p>
-                    </div>
-                    <div class="flex gap-2">
-                        <button class="px-6 py-3 bg-slate-900 text-white rounded-2xl font-bold text-xs uppercase">Exportar Reporte</button>
-                    </div>
-                </div>
-                <div class="grid grid-cols-1 gap-4" id="leads-container">
-                    </div>
-            </div>
-
-            <div id="view-academico" class="view-content hidden">
-                <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
-                    <div class="lg:col-span-1 space-y-6">
-                        <div class="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm">
-                            <h3 class="font-black text-lg mb-6 text-orange-600 uppercase italic">Registro Oficial</h3>
-                            <div class="space-y-4">
-                                <div>
-                                    <label class="text-[10px] font-black text-slate-400 uppercase ml-2">Alumno</label>
-                                    <input id="ins-nombre" type="text" class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none focus:ring-2 focus:ring-orange-500 font-bold">
-                                </div>
-                                <div>
-                                    <label class="text-[10px] font-black text-slate-400 uppercase ml-2">Carrera</label>
-                                    <select id="ins-carrera" class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none font-bold text-sm"></select>
-                                </div>
-                                <div>
-                                    <label class="text-[10px] font-black text-slate-400 uppercase ml-2">Matrícula</label>
-                                    <input id="ins-matricula" type="text" class="w-full p-4 bg-slate-50 rounded-2xl border-none outline-none font-mono">
-                                </div>
-                                <button onclick="inscribirAlumno()" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black uppercase text-xs tracking-widest mt-4">Inscribir en DB</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="lg:col-span-3">
-                        <div class="bg-white rounded-[2.5rem] border border-slate-200 overflow-hidden shadow-sm">
-                            <table class="w-full text-left">
-                                <thead class="bg-slate-50 border-b border-slate-100 text-[10px] font-black text-slate-400 uppercase">
-                                    <tr>
-                                        <th class="p-6">Expediente</th>
-                                        <th class="p-6">Programa Académico</th>
-                                        <th class="p-6">Estatus de Pago</th>
-                                        <th class="p-6">Kardex</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tabla-alumnos-activos" class="divide-y divide-slate-50">
-                                    </tbody>
-                            </table>
-                        </div>
-                        
-                        <div id="panel-horarios" class="mt-8 bg-orange-600 rounded-[2.5rem] p-10 text-white hidden relative overflow-hidden">
-                            <div class="relative z-10">
-                                <h4 class="text-2xl font-black mb-2 italic">Configuración de Horario</h4>
-                                <p class="text-orange-200 text-sm mb-8" id="nombre-alumno-horario"></p>
-                                <div id="lista-materias-disponibles" class="grid grid-cols-2 md:grid-cols-3 gap-4"></div>
-                            </div>
-                            <i class="fa-solid fa-graduation-cap absolute -right-10 -bottom-10 text-[15rem] opacity-10"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </section>
-    </main>
+        </div>
+    </div>
 
     <script>
+        // BASE DE DATOS LOCAL (Simulada hasta conectar el servidor)
+        let db_alumnos = [];
         const CARRERAS = {
-            "Lic. Cinematografía": ["Narrativa Visual", "Cinefotografía I", "Diseño Sonoro", "Post-Producción"],
-            "Ing. Diseño Automotriz": ["Sistemas de Frenado", "Modelado Superficies", "Dinámica de Fluidos", "Materiales Polímeros"],
-            "Lic. Derecho": ["Juicios Orales", "Derecho Corporativo", "Amparo I", "Propiedad Intelectual"],
-            "Ing. Software": ["DevOps & Cloud", "Arquitecturas Limpias", "Inteligencia Artificial", "Testing QA"],
-            "Lic. Administración": ["Gestión Estratégica", "Finanzas Corporativas", "Talento Humano", "Auditoría"],
-            "Lic. Dirección de Ventas": ["Neuroventas", "Estrategia CRM", "Key Account Management", "Forecast Comercial"],
-            "Lic. Arquitectura Digital": ["BIM & Revit", "Renderizado Motor Real-time", "Urbanismo Sostenible"]
+            cine: ["Producción Cinematográfica", "Guionismo", "Edición Digital", "Historia del Cine", "Fotografía I"],
+            derecho: ["Derecho Romano", "Introducción al Derecho", "Derecho Penal", "Sociología Jurídica"],
+            diseno: ["Teoría del Color", "Ilustración Digital", "Tipografía", "Semiótica"]
         };
 
-        let db_alumnos = [];
-
-        function handleLogin() {
-            const email = document.getElementById('auth-email').value;
-            if (email.includes('@ucic.edu.mx') || email === 'admin') {
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('profile-name').innerText = email.split('@')[0].toUpperCase();
-                initApp();
+        function intentarEntrar() {
+            const mail = document.getElementById('user-mail').value;
+            if(mail.includes('@') || mail === 'admin') {
+                document.getElementById('login-screen').classList.add('opacity-0', 'pointer-events-none');
+                setTimeout(() => document.getElementById('login-screen').remove(), 500);
+            } else {
+                alert("Acceso denegado. Use su correo @ucic.edu.mx");
             }
         }
 
-        function switchView(viewId) {
-            document.querySelectorAll('.view-content').forEach(v => v.classList.add('hidden'));
-            document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
-            document.getElementById('view-' + viewId).classList.remove('hidden');
-            document.getElementById('nav-' + viewId).classList.add('active');
-            document.getElementById('view-title').innerText = viewId.replace('-',' ');
-        }
-
-        function initApp() {
-            const sel = document.getElementById('ins-carrera');
-            sel.innerHTML = Object.keys(CARRERAS).map(c => `<option value="${c}">${c}</option>`).join('');
-            renderLeads();
-            initCharts();
-        }
-
-        function renderLeads() {
-            const container = document.getElementById('leads-container');
-            const leads = [
-                {n: "Carlos Mendívil", c: "Ing. Diseño Automotriz", s: "Nuevo", e: "Lic. Arturo"},
-                {n: "Laura Pozos", c: "Lic. Cinematografía", s: "En Seguimiento", e: "Lic. Andrea"}
-            ];
-            container.innerHTML = leads.map(l => `
-                <div class="bg-white p-6 rounded-3xl border border-slate-200 flex items-center justify-between hover:border-orange-300 transition-all shadow-sm">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center font-black">${l.n[0]}</div>
-                        <div>
-                            <p class="font-black text-lg">${l.n}</p>
-                            <p class="text-xs text-slate-400 font-bold uppercase">${l.c}</p>
-                        </div>
-                    </div>
-                    <div class="flex gap-10 items-center">
-                        <div class="text-right">
-                            <p class="text-[10px] font-black text-slate-400 uppercase">Ejecutivo Asignado</p>
-                            <p class="text-xs font-bold">${l.e}</p>
-                        </div>
-                        <span class="px-4 py-2 bg-orange-50 text-orange-600 rounded-xl text-[10px] font-black uppercase tracking-tighter">${l.s}</span>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function inscribirAlumno() {
+        function inscribir() {
             const nom = document.getElementById('ins-nombre').value;
             const car = document.getElementById('ins-carrera').value;
-            const mat = document.getElementById('ins-matricula').value;
-            if(!nom || !mat) return;
-            db_alumnos.push({ nom, car, mat, status: 'Al Corriente' });
+            if(!nom) return alert("Ingrese el nombre");
+
+            db_alumnos.push({ nom, car, horario: [] });
             renderAlumnos();
-            document.getElementById('ins-nombre').value = '';
+            document.getElementById('modal-inscripcion').classList.add('hidden');
+            document.getElementById('ins-nombre').value = "";
         }
 
         function renderAlumnos() {
-            const tabla = document.getElementById('tabla-alumnos-activos');
-            tabla.innerHTML = db_alumnos.map((a, i) => `
-                <tr class="hover:bg-slate-50/50">
+            const t = document.getElementById('tabla-alumnos');
+            t.innerHTML = db_alumnos.map((a, i) => `
+                <tr class="border-b border-white/5 hover:bg-white/5 transition-colors">
                     <td class="p-6">
-                        <p class="font-black">${a.nom}</p>
-                        <p class="text-[10px] text-slate-400 font-mono">${a.mat}</p>
+                        <div class="font-black text-lg">${a.nom.toUpperCase()}</div>
+                        <div class="text-[10px] font-bold text-orange-500 tracking-widest uppercase italic">${a.car}</div>
                     </td>
-                    <td class="p-6 text-xs font-bold text-slate-600">${a.car}</td>
-                    <td class="p-6"><span class="text-[10px] font-black uppercase text-green-500"><span class="status-dot bg-green-500"></span>${a.status}</span></td>
-                    <td class="p-6"><button onclick="verHorario(${i})" class="bg-slate-100 hover:bg-orange-600 hover:text-white px-4 py-2 rounded-xl text-[10px] font-black transition-all uppercase">Generar Horario</button></td>
+                    <td class="p-6 text-center">
+                        <button onclick="verHorario(${i})" class="bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white px-4 py-2 rounded-xl text-[10px] font-black transition-all">
+                            <i class="fa-solid fa-calendar-days mr-2"></i> HORARIO
+                        </button>
+                    </td>
                 </tr>
             `).join('');
         }
 
+        let alumnoIndexActual = null;
+
         function verHorario(i) {
+            alumnoIndexActual = i;
             const alu = db_alumnos[i];
             const p = document.getElementById('panel-horarios');
             p.classList.remove('hidden');
-            document.getElementById('nombre-alumno-horario').innerText = `PLAN DE ESTUDIOS PARA ${alu.nom} - ${alu.car}`;
+            
+            document.getElementById('nombre-alumno-horario').innerText = alu.nom.toUpperCase();
+            const container = document.getElementById('lista-materias-disponibles');
+            
             const mats = CARRERAS[alu.car] || [];
-            document.getElementById('lista-materias-disponibles').innerHTML = mats.map(m => `
-                <div class="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/20">
-                    <p class="text-xs font-black uppercase tracking-tight">${m}</p>
-                    <p class="text-[9px] text-orange-200 uppercase mt-1">Modalidad Presencial</p>
+            container.innerHTML = mats.map((m, mIdx) => `
+                <div class="bg-white/5 p-6 rounded-[2rem] border border-white/10 space-y-4">
+                    <div class="flex justify-between items-center border-b border-white/10 pb-4">
+                        <span class="text-xs font-black uppercase tracking-tighter">${m}</span>
+                        <button onclick="eliminarMateria(${mIdx})" class="text-red-400 hover:text-white transition-colors"><i class="fa-solid fa-circle-minus"></i></button>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <select class="bg-slate-900 text-[10px] p-3 rounded-xl border-none text-white font-bold outline-none">
+                            <option>LUN - MIE</option>
+                            <option>MAR - JUE</option>
+                            <option>VIERNES</option>
+                            <option>SABATINO</option>
+                        </select>
+                        <select class="bg-slate-900 text-[10px] p-3 rounded-xl border-none text-white font-bold outline-none">
+                            <option>07:00 - 09:00</option>
+                            <option>09:00 - 11:00</option>
+                            <option>11:00 - 13:00</option>
+                            <option>16:00 - 18:00</option>
+                            <option>18:00 - 20:00</option>
+                        </select>
+                    </div>
+                    <div class="flex gap-2">
+                        <select class="w-full bg-orange-600 text-[9px] p-3 rounded-xl border-none text-white font-black uppercase tracking-[0.2em] outline-none">
+                            <option value="presencial">📍 Presencial</option>
+                            <option value="hibrido">💻 Híbrido</option>
+                        </select>
+                    </div>
                 </div>
-            `).join('');
+            `).join('') + `
+                <div class="flex flex-col gap-4">
+                    <button onclick="agregarMateria(${i})" class="bg-white/5 hover:bg-white/10 border-2 border-dashed border-white/20 p-8 rounded-[2rem] text-[10px] font-black uppercase transition-all">
+                        <i class="fa-solid fa-plus mr-2"></i> Añadir Materia Extra
+                    </button>
+                    <button onclick="guardarCambios()" class="bg-white text-orange-600 p-5 rounded-[2rem] text-xs font-black uppercase shadow-2xl hover:scale-105 active:scale-95 transition-all">
+                        Guardar Horario Permanentemente
+                    </button>
+                </div>
+            `;
         }
 
-        function initCharts() {
-            const ctx1 = document.getElementById('chartVentas').getContext('2d');
-            new Chart(ctx1, {
-                type: 'bar',
-                data: { 
-                    labels: ['Cine', 'Auto', 'Software', 'Derecho', 'Ventas'], 
-                    datasets: [{ label: 'Prospectos', data: [45, 82, 31, 22, 55], backgroundColor: '#ea580c', borderRadius: 8 }] 
-                },
-                options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { display: false } }, x: { grid: { display: false } } } }
-            });
-            const ctx2 = document.getElementById('chartAcademia').getContext('2d');
-            new Chart(ctx2, {
-                type: 'doughnut',
-                data: { labels: ['Inscritos', 'Pendientes'], datasets: [{ data: [452, 148], backgroundColor: ['#ea580c', '#f1f5f9'], borderWeight: 0 }] },
-                options: { cutout: '80%', plugins: { legend: { position: 'bottom', labels: { font: { weight: 'bold', size: 10 } } } } }
-            });
+        function eliminarMateria(idx) {
+            const alu = db_alumnos[alumnoIndexActual];
+            CARRERAS[alu.car].splice(idx, 1);
+            verHorario(alumnoIndexActual);
+        }
+
+        function agregarMateria(i) {
+            const m = prompt("Nombre de la materia adicional:");
+            if(m) {
+                const alu = db_alumnos[i];
+                if(!CARRERAS[alu.car]) CARRERAS[alu.car] = [];
+                CARRERAS[alu.car].push(m);
+                verHorario(i);
+            }
+        }
+
+        function guardarCambios() {
+            alert("Sincronizando con la Base de Datos Local...");
+            document.getElementById('panel-horarios').classList.add('hidden');
         }
     </script>
 </body>
