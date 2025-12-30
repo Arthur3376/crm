@@ -200,10 +200,26 @@
             }
         }
 
-        function guardarCambios() {
-            alert("Sincronizando con la Base de Datos Local...");
+        async function guardarCambios() {
+    const alu = db_alumnos[alumnoIndexActual];
+    
+    try {
+        const response = await fetch('http://localhost:3000/api/save-alumno', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(alu)
+        });
+        
+        const result = await response.json();
+        if(result.status === 'success') {
+            alert("✅ DATOS SINCRONIZADOS CON EL SERVIDOR LOCAL");
             document.getElementById('panel-horarios').classList.add('hidden');
         }
+    } catch (error) {
+        alert("❌ ERROR: El servidor local no está encendido.");
+        console.error(error);
+    }
+}
     </script>
 </body>
 </html>
