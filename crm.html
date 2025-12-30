@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UCIC - Sistema de Gestión Operativa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .active-menu { background-color: #1e293b; border-left: 4px solid #ea580c; color: white; }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="flex h-screen overflow-hidden">
+        
+        <aside class="w-64 bg-slate-900 text-slate-400 flex-shrink-0 flex flex-col">
+            <div class="p-6 text-xl font-bold text-white border-b border-slate-800 flex items-center gap-2">
+                <div class="w-8 h-8 bg-orange-600 rounded shadow-lg"></div> UCIC CRM
+            </div>
+            <nav class="flex-1 p-3 space-y-1 overflow-y-auto">
+                <button onclick="changeView('dashboard')" id="btn-dashboard" class="w-full flex items-center gap-3 p-3 rounded-lg transition active-menu">📊 Dashboard</button>
+                <button onclick="changeView('prospectos')" id="btn-prospectos" class="w-full flex items-center gap-3 p-3 hover:bg-slate-800 rounded-lg transition">👥 CRM Prospectos</button>
+                <button onclick="changeView('inventario')" id="btn-inventario" class="w-full flex items-center gap-3 p-3 hover:bg-slate-800 rounded-lg transition">📦 Inventario Activos</button>
+                <button onclick="changeView('pagos')" id="btn-pagos" class="w-full flex items-center gap-3 p-3 hover:bg-slate-800 rounded-lg transition">💰 Control de Pagos</button>
+                
+                <div class="pt-6 mt-6 border-t border-slate-800">
+                    <a href="index.html" class="flex items-center gap-3 p-3 text-orange-500 hover:bg-orange-500/10 rounded-lg transition font-bold">🏠 Salir al Sitio</a>
+                </div>
+            </nav>
+            <div class="p-4 bg-slate-950 text-[10px] text-center uppercase tracking-widest text-slate-600">
+                Powered by UCIC Tech
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col overflow-hidden">
+            <header class="bg-white shadow-sm h-16 flex items-center justify-between px-8 border-b">
+                <h2 id="view-title" class="text-lg font-bold text-slate-700">Panel de Control</h2>
+                <div class="flex items-center gap-6">
+                    <div class="hidden md:flex bg-gray-100 rounded-full px-4 py-1.5 items-center gap-2 border">
+                        <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                        <span class="text-[10px] font-bold text-gray-500">SERVER ONLINE</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="text-right">
+                            <p class="text-xs font-black">Arturo Rojas</p>
+                            <p class="text-[10px] text-orange-500 font-bold">Administrador</p>
+                        </div>
+                        <div class="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center text-white font-bold border-2 border-orange-500">A</div>
+                    </div>
+                </div>
+            </header>
+
+            <div id="content-area" class="p-8 overflow-y-auto">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 transform hover:scale-105 transition">
+                        <p class="text-[10px] text-gray-400 font-black uppercase tracking-widest">Leads Totales</p>
+                        <p class="text-3xl font-black mt-2">1,248</p>
+                        <p class="text-[10px] text-green-500 mt-2 font-bold">▲ 12% este mes</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 transform hover:scale-105 transition">
+                        <p class="text-[10px] text-gray-400 font-black uppercase tracking-widest">En Proceso</p>
+                        <p class="text-3xl font-black mt-2 text-blue-600">452</p>
+                        <p class="text-[10px] text-gray-400 mt-2 font-bold italic">Pendientes de llamada</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 transform hover:scale-105 transition">
+                        <p class="text-[10px] text-gray-400 font-black uppercase tracking-widest">Inscripciones</p>
+                        <p class="text-3xl font-black mt-2 text-orange-600">86</p>
+                        <p class="text-[10px] text-orange-500 mt-2 font-bold">Meta: 150</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 transform hover:scale-105 transition">
+                        <p class="text-[10px] text-gray-400 font-black uppercase tracking-widest">Revenue</p>
+                        <p class="text-3xl font-black mt-2 text-emerald-600">$420k</p>
+                        <p class="text-[10px] text-emerald-500 mt-2 font-bold">MXN Bruto</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+                    <div id="table-header" class="p-6 border-b bg-gray-50 flex justify-between items-center">
+                        <h3 class="font-black uppercase tracking-tighter text-slate-800">Monitor en Tiempo Real</h3>
+                        <button class="bg-slate-900 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-orange-600 transition">Descargar Reporte</button>
+                    </div>
+                    <div id="table-dynamic" class="overflow-x-auto">
+                        </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const data = {
+            dashboard: [
+                { id: "001", nombre: "Juan Pérez", info: "Interesado en Cine", status: "Caliente", color: "bg-red-100 text-red-700" },
+                { id: "002", nombre: "Maria Garcia", info: "Pide Beca 50%", status: "Enviado", color: "bg-blue-100 text-blue-700" },
+                { id: "003", nombre: "Carlos Slim", info: "Inscrito", status: "Cerrado", color: "bg-green-100 text-green-700" }
+            ],
+            inventario: [
+                { id: "EQU-01", nombre: "Cámara Sony A7III", info: "Bodega Santiago", status: "Disponible", color: "bg-green-100 text-green-700" },
+                { id: "EQU-02", nombre: "Drone Mavic 3", info: "En Préstamo", status: "Ocupado", color: "bg-orange-100 text-orange-700" }
+            ],
+            pagos: [
+                { id: "PAG-99", nombre: "Inscripción Enero", info: "$4,500.00", status: "Pagado", color: "bg-green-100 text-green-700" },
+                { id: "PAG-100", nombre: "Mensualidad Feb", info: "$3,200.00", status: "Pendiente", color: "bg-red-100 text-red-700" }
+            ]
+        };
+
+        function changeView(view) {
+            // Actualizar Título
+            const titles = { dashboard: "Dashboard General", prospectos: "Gestión de Prospectos", inventario: "Control de Activos", pagos: "Finanzas y Pagos" };
+            document.getElementById('view-title').innerText = titles[view];
+
+            // Actualizar Menú Activo
+            document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active-menu'));
+            document.getElementById('btn-' + view).classList.add('active-menu');
+
+            // Generar Tabla Dinámica
+            let tableHTML = `<table class="w-full text-left text-sm"><thead class="bg-gray-50 text-gray-400 font-bold uppercase text-[10px]"><tr><th class="p-4">ID/Ref</th><th class="p-4">Nombre / Concepto</th><th class="p-4">Información</th><th class="p-4">Estado</th></tr></thead><tbody class="divide-y">`;
+            
+            const currentData = data[view] || data.dashboard;
+            currentData.forEach(item => {
+                tableHTML += `<tr>
+                    <td class="p-4 font-mono text-xs text-gray-400">${item.id}</td>
+                    <td class="p-4 font-bold text-slate-700">${item.nombre}</td>
+                    <td class="p-4 text-gray-500">${item.info}</td>
+                    <td class="p-4"><span class="${item.color} px-3 py-1 rounded-full text-[10px] font-black uppercase">${item.status}</span></td>
+                </tr>`;
+            });
+            tableHTML += `</tbody></table>`;
+            
+            document.getElementById('table-dynamic').innerHTML = tableHTML;
+        }
+
+        // Cargar vista inicial
+        changeView('dashboard');
+    </script>
+</body>
+</html>
